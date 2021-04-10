@@ -1,0 +1,1 @@
+# Interfaces für Graph-Datenstruktur

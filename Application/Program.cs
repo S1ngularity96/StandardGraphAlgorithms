@@ -1,12 +1,12 @@
 ﻿using System;
 
-namespace GraphAlgorithms
+namespace MA
 {
     class Program
     {
         static void Main(string[] args)
         {
-            
+
         }
     }
 }
