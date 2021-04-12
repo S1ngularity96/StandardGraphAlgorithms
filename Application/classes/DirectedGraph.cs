@@ -1,24 +1,21 @@
 using MA.Interfaces;
-using System;
+using MA.Collections;
+using System.IO;
 namespace MA.Classes
 {
     public class DirectedGraph : Graph
     {
-        public override void AddEdge(int N1, int N2)
-        {
-            Node node = nodes.GetOrAdd(N1);
-            node.AddEdge(N2);
-            this.NUMBER_OF_EDGES++;
-        }
 
         public override void AddEdge(int N1, int N2, float capacity)
         {
-            throw new NotImplementedException();
+            Node node = nodes.GetOrAdd(N1);
+            node.AddEdge(N2, capacity);
+            this.NUMBER_OF_EDGES++;
         }
 
-        public override void ReadFromFile(string path)
+        public override string ToString()
         {
-            throw new System.NotImplementedException();
+            return $"Directed Graph\n|V| = {nodes.Count}\n|E| = {NUMBER_OF_EDGES}";
         }
     }
 }
