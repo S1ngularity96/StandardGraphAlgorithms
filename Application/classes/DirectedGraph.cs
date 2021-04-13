@@ -1,6 +1,5 @@
 using MA.Interfaces;
-using MA.Collections;
-using System.IO;
+using MA.Exceptions;
 namespace MA.Classes
 {
     public class DirectedGraph : Graph
@@ -8,9 +7,14 @@ namespace MA.Classes
 
         public override void AddEdge(int N1, int N2, float capacity)
         {
-            Node node = nodes.GetOrAdd(N1);
-            node.AddEdge(N2, capacity);
-            this.NUMBER_OF_EDGES++;
+            if (this.nodes == null)
+            {
+                throw new GraphException("No nodes in Graph exist");
+            }
+            Node n1 = nodes[N1];
+            Node n2 = nodes[N2];
+            n1.AddEdge(n2, capacity);
+            NUMBER_OF_EDGES++;
         }
 
         public override string ToString()

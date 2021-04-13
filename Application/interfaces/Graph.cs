@@ -1,4 +1,6 @@
 using MA.Collections;
+using MA.Classes;
+using System.Collections.Generic;
 using System.IO;
 namespace MA.Interfaces
 {
@@ -12,6 +14,25 @@ namespace MA.Interfaces
             return this.nodes.Count;
         }
         public int NUMBER_OF_EDGES { get; set; }
+
+        public void UnmarkAllNodes()
+        {
+            foreach (KeyValuePair<int, Node> pair in nodes)
+            {
+                pair.Value.unmark();
+            }
+        }
+        public Node GetFirstUnmarkedNode()
+        {
+            foreach (KeyValuePair<int, Node> pair in nodes)
+            {
+                if (pair.Value.isMarked() == false)
+                {
+                    return pair.Value;
+                }
+            }
+            return null;
+        }
         public void ReadFromFile(string path, bool capacity)
         {
             int LINES_READ = 0;
@@ -43,6 +64,7 @@ namespace MA.Interfaces
                 }
             }
         }
-        public abstract void AddEdge(int N1, int N2, float capacity);
+        public abstract void AddEdge(int n1, int n2, float capacity);
+
     }
 }

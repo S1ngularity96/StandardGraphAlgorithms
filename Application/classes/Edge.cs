@@ -1,27 +1,28 @@
 using MA.Exceptions;
+using MA.Classes;
 namespace MA.Classes
 {
     public class Edge
     {
         bool WITH_CAPACITY = false;
-        private int NODE_ID;
+        private Node node;
         private float CAPACITY = 0.0f;
 
-        public Edge(int NODE_ID)
+        public Edge(Node node)
         {
-            this.NODE_ID = NODE_ID;
+            this.node = node;
         }
 
-        public Edge(int nodeId, float capacity)
+        public Edge(Node node, float capacity)
         {
-            this.NODE_ID = nodeId;
+            this.node = node;
             this.CAPACITY = capacity;
             this.WITH_CAPACITY = true;
         }
 
-        public int GetPointedNodeID()
+        public Node GetPointedNode()
         {
-            return NODE_ID;
+            return this.node;
         }
 
         public float GetCapacity()

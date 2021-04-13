@@ -10,7 +10,7 @@ namespace MA.Collections
         {
             for (int nodeindex = 0; nodeindex < numberOfNodes; nodeindex++)
             {
-                this.Add(nodeindex, new Node());
+                this.Add(nodeindex, new Node(nodeindex));
             }
         }
 
@@ -28,7 +28,7 @@ namespace MA.Collections
             {
                 return this[key];
             }
-            Node node = new Node();
+            Node node = new Node(key);
             this.Add(key, node);
             return node;
         }
