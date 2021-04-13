@@ -6,7 +6,7 @@ namespace MA.Classes
     {
         public int ID { get; set; }
         private bool V_MARKED { get; set; }
-        List<Edge> edges = new List<Edge>();
+        public List<Edge> edges = new List<Edge>();
 
         public Node() { }
         public Node(int id)
