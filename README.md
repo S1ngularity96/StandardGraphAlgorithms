@@ -3,7 +3,7 @@
 - Ungewichteter Graph
 - Gewichteter Graph
 ## Algorithmen
-### Traviersierung
+### Traversierung
 - Tiefensuche  + Zusammenhangskomponenten identifizieren
 - Breitensuche + Zusammenhangskomponenten identifizieren
 ### MST
