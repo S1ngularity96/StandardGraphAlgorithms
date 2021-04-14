@@ -1,6 +1,7 @@
 using MA.Interfaces;
 using System.Collections.Generic;
 using MA.Classes;
+using System;
 using MA.Collections;
 namespace MA
 {
@@ -31,36 +32,6 @@ namespace MA
                 }
                 components++;
             }
-            return components;
-        }
-
-        public static int DepthSearch(Graph g)
-        {
-            System.Console.WriteLine("Counting Graph-Components ... ");
-            int components = 0;
-            g.UnmarkAllNodes();
-            Stack<Node> stack = new Stack<Node>();
-            for (Node node = g.GetFirstUnmarkedNode(); node != null; node = g.GetFirstUnmarkedNode())
-            {
-                node.mark();
-                stack.Push(node);
-                while (stack.Count != 0)
-                {
-                    Node topNode = stack.Pop();
-                    foreach (Edge edge in topNode.edges)
-                    {
-                        Node pointed = edge.GetPointedNode();
-                        if (!pointed.isMarked())
-                        {
-                            pointed.mark();
-                            stack.Push(pointed);
-                        }
-
-                    }
-                }
-                components++;
-            }
-
             return components;
         }
     }

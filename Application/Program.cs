@@ -1,21 +1,43 @@
 ﻿using MA.Interfaces;
 using MA.Classes;
-using System.Diagnostics;
+using MA.Helper;
+using CommandLine;
+using System.Collections.Generic;
 namespace MA
 {
     class Program
     {
+
+
+
+
         static void Main(string[] args)
         {
-            var filename = "/Graph_ganzganzgross.txt";
+            System.Console.OutputEncoding = System.Text.Encoding.UTF8;
+            CommandLine.Parser.Default.ParseArguments<CLIOptions>(args).
+            WithParsed(RunOptions).
+            WithNotParsed(HandleParseError);
+
+        }
+        static void RunOptions(CLIOptions options)
+        {
             Graph g = new UndirectedGraph();
-            g.ReadFromFile(Config.DATA_DIR + filename, capacity: false);
+            g.ReadFromFile(options.File, options.capacity);
+
             System.Console.WriteLine(g);
-            Stopwatch watch = new Stopwatch();
-            watch.Start();
-            var components = Algorithms.DepthSearch(g);
-            watch.Stop();
-            System.Console.WriteLine($"Graph {filename} consists of {components} components. Sek:{watch.ElapsedMilliseconds / 1000}");
+            Diagnostic.MeasureTime(() =>
+            {
+                var components = Algorithms.BreadthSearch(g);
+                System.Console.WriteLine($"Graph consists of {components} components.");
+            });
+
+
+
+        }
+
+        static void HandleParseError(IEnumerable<Error> errors)
+        {
+
         }
     }
 }

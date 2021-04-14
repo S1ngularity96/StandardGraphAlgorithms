@@ -35,12 +35,18 @@ namespace MA.Interfaces
         }
         public void ReadFromFile(string path, bool capacity)
         {
+            if (!File.Exists((path)))
+            {
+                return;
+            }
+            System.Console.WriteLine($"Importing Graph from file {Path.GetFileName(path)} ...");
             int LINES_READ = 0;
             const int V_FROM = 0;
             const int V_TO = 1;
             const int CAP_INDEX = 2;
             using (StreamReader sr = File.OpenText(path))
             {
+
                 string S_DATA = "";
                 //Read first Line to get Number of Entries
                 if ((S_DATA = sr.ReadLine()) != null)
