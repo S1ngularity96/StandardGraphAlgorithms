@@ -9,11 +9,6 @@ namespace MA
     {
         public static int BreadthSearch(Graph g)
         {
-            HashSet<int> set = new HashSet<int>();
-            for (int node = 0; node < g.NUMBER_OF_NODES(); node++)
-            {
-                set.Add(node);
-            }
             System.Console.WriteLine("Counting Graph-Components ...");
             g.UnmarkAllNodes();
             int components = 0;
@@ -40,6 +35,47 @@ namespace MA
                 components++;
             }
             return components;
+        }
+
+        public static int DepthSearch(Graph g)
+        {
+            int components = 0;
+            System.Console.WriteLine("Counting Graph-Components ...");
+            g.UnmarkAllNodes();
+            for (Node node = g.GetFirstUnmarkedNode(); node != null; node = g.GetFirstUnmarkedNode())
+            {
+                components++;
+                DepthTraverse(g, node);
+            }
+            return components;
+        }
+
+        public static void DepthTraverse(Graph g, Node node)
+        {
+            if (node == null) { return; }
+            node.mark();
+            g.MarkNode(node.ID);
+
+            List<Edge>.Enumerator enumerator = node.edges.GetEnumerator();
+            Stack<List<Edge>.Enumerator> stack = new Stack<List<Edge>.Enumerator>();
+            stack.Push(enumerator);
+
+            while (stack.Count != 0)
+            {
+                var edge_loop_enumerator = stack.Pop();
+                while (edge_loop_enumerator.MoveNext())
+                {
+                    if (!edge_loop_enumerator.Current.GetPointedNode().isMarked())
+                    {
+                        edge_loop_enumerator.Current.GetPointedNode().mark();
+                        g.MarkNode(edge_loop_enumerator.Current.GetPointedNode().ID);
+                        stack.Push(edge_loop_enumerator);
+                        stack.Push(edge_loop_enumerator.Current.GetPointedNode().edges.GetEnumerator());
+                        break;
+                    }
+                }
+            }
+
         }
     }
 }
