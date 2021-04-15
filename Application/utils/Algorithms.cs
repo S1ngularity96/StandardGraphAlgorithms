@@ -9,6 +9,11 @@ namespace MA
     {
         public static int BreadthSearch(Graph g)
         {
+            HashSet<int> set = new HashSet<int>();
+            for (int node = 0; node < g.NUMBER_OF_NODES(); node++)
+            {
+                set.Add(node);
+            }
             System.Console.WriteLine("Counting Graph-Components ...");
             g.UnmarkAllNodes();
             int components = 0;
@@ -17,6 +22,7 @@ namespace MA
             for (Node node = g.GetFirstUnmarkedNode(); node != null; node = g.GetFirstUnmarkedNode())
             {
                 node.mark();
+                g.MarkNode(node.ID);
                 queue.Enqueue(node);
                 // BreadthSearch itself
                 while (queue.Count > 0)
@@ -27,6 +33,7 @@ namespace MA
                     foreach (Node neighbour in neighbours)
                     {
                         neighbour.mark();
+                        g.MarkNode(neighbour.ID);
                         queue.Enqueue(neighbour);
                     }
                 }

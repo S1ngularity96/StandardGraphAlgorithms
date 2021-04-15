@@ -8,9 +8,7 @@ namespace MA
     class Program
     {
 
-
-
-
+        public static bool ENABLE_TIME_MEASUREMENTS = false;
         static void Main(string[] args)
         {
             System.Console.OutputEncoding = System.Text.Encoding.UTF8;
@@ -21,18 +19,15 @@ namespace MA
         }
         static void RunOptions(CLIOptions options)
         {
+            ENABLE_TIME_MEASUREMENTS = options.stopwatch;
             Graph g = new UndirectedGraph();
-            g.ReadFromFile(options.File, options.capacity);
-
+            Diagnostic.MeasureTime(() => { g.ReadFromFile(options.File, options.capacity); });
             System.Console.WriteLine(g);
             Diagnostic.MeasureTime(() =>
             {
                 var components = Algorithms.BreadthSearch(g);
                 System.Console.WriteLine($"Graph consists of {components} components.");
             });
-
-
-
         }
 
         static void HandleParseError(IEnumerable<Error> errors)
