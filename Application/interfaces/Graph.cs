@@ -60,7 +60,7 @@ namespace MA.Interfaces
                     string[] VERTICES = S_DATA.Split('\t');
                     if (capacity)
                     {
-                        this.AddEdge(int.Parse(VERTICES[V_FROM]), int.Parse(VERTICES[V_TO]), int.Parse(VERTICES[CAP_INDEX]));
+                        this.AddEdge(int.Parse(VERTICES[V_FROM]), int.Parse(VERTICES[V_TO]), float.Parse(VERTICES[CAP_INDEX]));
                     }
                     else
                     {

@@ -24,7 +24,7 @@ namespace MA
                     while (queue.Count > 0)
                     {
                         Node firstNode = queue.Dequeue();
-                        List<Node> neighbours = firstNode.GetUnmarkedNeigbours();
+                        List<Node> neighbours = GraphUtils.GetUnmarkedNeighbours(g, firstNode.ID);
 
                         foreach (Node neighbour in neighbours)
                         {
@@ -71,16 +71,27 @@ namespace MA
                 var edge_loop_enumerator = stack.Pop();
                 while (edge_loop_enumerator.MoveNext())
                 {
-                    if (!edge_loop_enumerator.Current.GetPointedNode().isMarked())
+                    if (!g.nodes[edge_loop_enumerator.Current.V_TO].isMarked())
                     {
-                        edge_loop_enumerator.Current.GetPointedNode().mark();
+                        g.nodes[edge_loop_enumerator.Current.V_TO].mark();
                         stack.Push(edge_loop_enumerator);
-                        stack.Push(edge_loop_enumerator.Current.GetPointedNode().edges.GetEnumerator());
+                        stack.Push(g.nodes[edge_loop_enumerator.Current.V_TO].edges.GetEnumerator());
                         break;
                     }
                 }
             }
 
         }
+
+        public static void Prim(Graph g)
+        {
+
+        }
+
+        public static void Kruskal(Graph g)
+        {
+
+        }
+
     }
 }
