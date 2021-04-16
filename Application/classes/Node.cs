@@ -13,41 +13,29 @@ namespace MA.Classes
             this.ID = id;
         }
 
-        public void AddEdge(Node node)
+        public void AddEdge(int V_FROM, int V_TO)
         {
-            edges.Add(new Edge(node));
+            edges.Add(new Edge(V_FROM, V_TO));
         }
 
-        public void AddEdge(Node node, float capacity)
+        public void AddEdge(int V_FROM, int V_TO, float capacity)
         {
-            edges.Add(new Edge(node, capacity));
+            edges.Add(new Edge(V_FROM, V_TO, capacity));
         }
 
+#warning Will not work with undirected edges
         public void RemoveEdge(int node, ref int NUMBER_OF_EDGES)
         {
             int SUM_EDGES = edges.Count;
             for (int edge = 0; edge < SUM_EDGES; edge++)
             {
-                if (edges[edge].GetPointedNode().ID == node)
+                if (edges[edge].V_TO == node)
                 {
                     edges.RemoveAt(edge);
                     NUMBER_OF_EDGES--;
                     return;
                 }
             }
-        }
-
-        public List<Node> GetUnmarkedNeigbours()
-        {
-            List<Node> nodes = new List<Node>();
-            foreach (Edge edge in edges)
-            {
-                if (!edge.GetPointedNode().isMarked())
-                {
-                    nodes.Add(edge.GetPointedNode());
-                }
-            }
-            return nodes;
         }
 
         #region mark

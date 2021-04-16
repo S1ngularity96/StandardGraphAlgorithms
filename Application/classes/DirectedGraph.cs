@@ -11,9 +11,8 @@ namespace MA.Classes
             {
                 throw new GraphException("No nodes in Graph exist");
             }
-            Node n1 = nodes[N1];
-            Node n2 = nodes[N2];
-            n1.AddEdge(n2, capacity);
+            Node n1 = nodes.GetOrAdd(N1);
+            n1.AddEdge(N1, N2, capacity);
             NUMBER_OF_EDGES++;
         }
 

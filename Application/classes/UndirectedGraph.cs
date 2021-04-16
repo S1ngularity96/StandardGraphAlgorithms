@@ -17,8 +17,8 @@ namespace MA.Classes
             }
             Node n1 = nodes[N1];
             Node n2 = nodes[N2];
-            n1.AddEdge(n2, capacity);
-            n2.AddEdge(n1, capacity);
+            n1.AddEdge(N1, N2, capacity);
+            n2.AddEdge(N2, N1, capacity);
             NUMBER_OF_EDGES++;
         }
 
