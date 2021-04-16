@@ -25,7 +25,7 @@ namespace MA
             System.Console.WriteLine(g);
             Diagnostic.MeasureTime(() =>
             {
-                var components = Algorithms.DepthSearch(g);
+                var components = Algorithms.BreadthSearch(g);
                 System.Console.WriteLine($"Graph consists of {components} components.");
             });
         }

@@ -1,8 +1,6 @@
 using MA.Interfaces;
 using System.Collections.Generic;
 using MA.Classes;
-using System;
-using MA.Collections;
 namespace MA
 {
     public static class Algorithms
@@ -14,25 +12,29 @@ namespace MA
             int components = 0;
             Queue<Node> queue = new Queue<Node>();
             // Foreach Graph-Component
-            for (Node node = g.GetFirstUnmarkedNode(); node != null; node = g.GetFirstUnmarkedNode())
+            int NUMBER_OF_NODES = g.NUMBER_OF_NODES();
+            for (int current_node = 0; current_node < NUMBER_OF_NODES; current_node++)
             {
-                node.mark();
-                g.MarkNode(node.ID);
-                queue.Enqueue(node);
-                // BreadthSearch itself
-                while (queue.Count > 0)
+                Node node = g.nodes[current_node];
+                if (!node.isMarked())
                 {
-                    Node firstNode = queue.Dequeue();
-                    List<Node> neighbours = firstNode.GetUnmarkedNeigbours();
-
-                    foreach (Node neighbour in neighbours)
+                    node.mark();
+                    queue.Enqueue(node);
+                    // BreadthSearch itself
+                    while (queue.Count > 0)
                     {
-                        neighbour.mark();
-                        g.MarkNode(neighbour.ID);
-                        queue.Enqueue(neighbour);
+                        Node firstNode = queue.Dequeue();
+                        List<Node> neighbours = firstNode.GetUnmarkedNeigbours();
+
+                        foreach (Node neighbour in neighbours)
+                        {
+                            neighbour.mark();
+                            queue.Enqueue(neighbour);
+                        }
                     }
+                    components++;
                 }
-                components++;
+
             }
             return components;
         }
@@ -42,10 +44,15 @@ namespace MA
             int components = 0;
             System.Console.WriteLine("Counting Graph-Components ...");
             g.UnmarkAllNodes();
-            for (Node node = g.GetFirstUnmarkedNode(); node != null; node = g.GetFirstUnmarkedNode())
+            int NUMBER_OF_NODES = g.NUMBER_OF_NODES();
+            for (int current_node = 0; current_node < NUMBER_OF_NODES; current_node++)
             {
-                components++;
-                DepthTraverse(g, node);
+                Node node = g.nodes[current_node];
+                if (!node.isMarked())
+                {
+                    components++;
+                    DepthTraverse(g, node);
+                }
             }
             return components;
         }
@@ -54,7 +61,6 @@ namespace MA
         {
             if (node == null) { return; }
             node.mark();
-            g.MarkNode(node.ID);
 
             List<Edge>.Enumerator enumerator = node.edges.GetEnumerator();
             Stack<List<Edge>.Enumerator> stack = new Stack<List<Edge>.Enumerator>();
@@ -68,7 +74,6 @@ namespace MA
                     if (!edge_loop_enumerator.Current.GetPointedNode().isMarked())
                     {
                         edge_loop_enumerator.Current.GetPointedNode().mark();
-                        g.MarkNode(edge_loop_enumerator.Current.GetPointedNode().ID);
                         stack.Push(edge_loop_enumerator);
                         stack.Push(edge_loop_enumerator.Current.GetPointedNode().edges.GetEnumerator());
                         break;

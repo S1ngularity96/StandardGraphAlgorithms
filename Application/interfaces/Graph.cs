@@ -7,7 +7,6 @@ namespace MA.Interfaces
     public abstract class Graph
     {
         public NodeSet nodes = null;
-        public HashSet<int> nonVisited = new HashSet<int>();
         public int NUMBER_OF_NODES()
         {
             if (this.nodes == null) { return 0; };
@@ -17,23 +16,19 @@ namespace MA.Interfaces
 
         public void UnmarkAllNodes()
         {
-            nonVisited.Clear();
             foreach (KeyValuePair<int, Node> pair in nodes)
             {
                 pair.Value.unmark();
-                nonVisited.Add(pair.Value.ID);
             }
-        }
-        public void MarkNode(int id)
-        {
-            nonVisited.Remove(id);
         }
         public Node GetFirstUnmarkedNode()
         {
-            var enumerator = nonVisited.GetEnumerator();
-            if (enumerator.MoveNext())
+            foreach (KeyValuePair<int, Node> pair in nodes)
             {
-                return nodes[enumerator.Current];
+                if (!pair.Value.isMarked())
+                {
+                    return pair.Value;
+                }
             }
             return null;
         }
@@ -63,8 +58,14 @@ namespace MA.Interfaces
                 {
                     LINES_READ++;
                     string[] VERTICES = S_DATA.Split('\t');
-
-                    this.AddEdge(int.Parse(VERTICES[V_FROM]), int.Parse(VERTICES[V_TO]), 0.0f);
+                    if (capacity)
+                    {
+                        this.AddEdge(int.Parse(VERTICES[V_FROM]), int.Parse(VERTICES[V_TO]), int.Parse(VERTICES[CAP_INDEX]));
+                    }
+                    else
+                    {
+                        this.AddEdge(int.Parse(VERTICES[V_FROM]), int.Parse(VERTICES[V_TO]), 0.0f);
+                    }
 
                 }
             }
