@@ -1,11 +1,11 @@
 # Mathematische Algorithmen 
 ## Datenstrukturen
-- Ungewichteter Graph
-- Gewichteter Graph
+- [x] Ungewichteter Graph
+- [x] Gewichteter Graph
 ## Algorithmen
 ### Traversierung
-- Tiefensuche  + Zusammenhangskomponenten identifizieren
-- Breitensuche + Zusammenhangskomponenten identifizieren
+- [x] Tiefensuche  + Zusammenhangskomponenten identifizieren
+- [x] Breitensuche + Zusammenhangskomponenten identifizieren
 ### MST
-- Prim
-- Kruskal
+- [ ] Prim
+- [ ] Kruskal
