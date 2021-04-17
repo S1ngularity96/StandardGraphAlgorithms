@@ -2,6 +2,7 @@
 using MA.Classes;
 using MA.Helper;
 using CommandLine;
+using System;
 using System.Collections.Generic;
 namespace MA
 {
@@ -11,6 +12,9 @@ namespace MA
         public static bool ENABLE_TIME_MEASUREMENTS = false;
         static void Main(string[] args)
         {
+
+
+
             System.Console.OutputEncoding = System.Text.Encoding.UTF8;
             CommandLine.Parser.Default.ParseArguments<CLIOptions>(args).
             WithParsed(RunOptions).
@@ -25,8 +29,8 @@ namespace MA
             System.Console.WriteLine(g);
             Diagnostic.MeasureTime(() =>
             {
-                var components = Algorithms.BreadthSearch(g);
-                System.Console.WriteLine($"Graph consists of {components} components.");
+                var result = Algorithms.Prim(g, creategraph: false);
+                System.Console.WriteLine($"Sum of Edges is {result.Item1}");
             });
         }
 

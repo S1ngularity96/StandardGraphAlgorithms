@@ -1,6 +1,8 @@
 using MA.Interfaces;
 using System.Collections.Generic;
 using MA.Classes;
+using System;
+using Priority_Queue;
 namespace MA
 {
     public static class Algorithms
@@ -83,9 +85,51 @@ namespace MA
 
         }
 
-        public static void Prim(Graph g)
+        public static Tuple<float, Graph> Prim(Graph g, bool creategraph)
         {
+            //Prepare Graph for Prim
+            int NUMBER_OF_NODES = g.NUMBER_OF_NODES();
+            Graph G_neu = new UndirectedGraph();
+            float Capacity_Sum = 0.0f;
+            g.UnmarkAllNodes();
+            HashSet<Edge> visited_edges = new HashSet<Edge>();
 
+            if (creategraph)
+                G_neu.nodes = new Collections.NodeSet(NUMBER_OF_NODES);
+            //Prepare Queue
+            Node node_random = g.GetFirstUnmarkedNode();
+            node_random.mark();
+            SimplePriorityQueue<Edge> pr_queue = new SimplePriorityQueue<Edge>();
+
+            foreach (Edge edge in node_random.edges)
+            {
+                pr_queue.Enqueue(edge, edge.GetCapacity());
+            }
+
+            //Iterations
+
+            while (pr_queue.Count != 0)
+            {
+                Edge edge = pr_queue.Dequeue();
+                if (!g.nodes[edge.V_TO].isMarked())
+                {
+                    visited_edges.Add(edge);
+                    Node node = g.nodes[edge.V_TO];
+                    node.mark();
+                    if (creategraph)
+                        G_neu.AddEdge(edge.V_FROM, edge.V_TO, edge.GetCapacity());
+
+                    Capacity_Sum = Capacity_Sum + edge.GetCapacity();
+                    foreach (Edge neigbour_edge in node.edges)
+                    {
+                        if (!visited_edges.Contains(neigbour_edge))
+                        {
+                            pr_queue.Enqueue(neigbour_edge, neigbour_edge.GetCapacity());
+                        }
+                    }
+                }
+            }
+            return new Tuple<float, Graph>(Capacity_Sum, G_neu);
         }
 
         public static void Kruskal(Graph g)

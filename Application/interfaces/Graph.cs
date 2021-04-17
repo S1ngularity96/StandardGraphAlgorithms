@@ -2,6 +2,7 @@ using MA.Collections;
 using MA.Classes;
 using System.Collections.Generic;
 using System.IO;
+using System.Globalization;
 namespace MA.Interfaces
 {
     public abstract class Graph
@@ -60,7 +61,7 @@ namespace MA.Interfaces
                     string[] VERTICES = S_DATA.Split('\t');
                     if (capacity)
                     {
-                        this.AddEdge(int.Parse(VERTICES[V_FROM]), int.Parse(VERTICES[V_TO]), float.Parse(VERTICES[CAP_INDEX]));
+                        this.AddEdge(int.Parse(VERTICES[V_FROM]), int.Parse(VERTICES[V_TO]), float.Parse(VERTICES[CAP_INDEX], CultureInfo.InvariantCulture.NumberFormat));
                     }
                     else
                     {
