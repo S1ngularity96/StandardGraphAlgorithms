@@ -29,7 +29,7 @@ namespace MA
             System.Console.WriteLine(g);
             Diagnostic.MeasureTime(() =>
             {
-                var result = Algorithms.Prim(g, creategraph: false);
+                var result = Algorithms.Kruskal(g, creategraph: false);
                 System.Console.WriteLine($"Sum of Edges is {result.Item1}");
             });
         }
