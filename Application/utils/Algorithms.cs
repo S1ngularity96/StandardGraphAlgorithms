@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using MA.Interfaces;
 using MA.Collections;
 using MA.Classes;
+using MA.Helper;
 using Priority_Queue;
 namespace MA
 {
@@ -144,24 +145,32 @@ namespace MA
             SimplePriorityQueue<Edge> pr_queue = new SimplePriorityQueue<Edge>();
             DisjointSetCollection set_collection = new DisjointSetCollection(NUMBER_OF_NODES);
             //Put all Edges in Priority Queue
-            foreach (Node node in g.nodes.Values)
+            Diagnostic.MeasureTime(() =>
             {
-                foreach (Edge edge in node.edges)
+                System.Console.WriteLine("Kruskal: Adding adges to PriorityQueue");
+                foreach (Node node in g.nodes.Values)
                 {
-                    pr_queue.Enqueue(edge, edge.GetCapacity());
+                    foreach (Edge edge in node.edges)
+                    {
+                        pr_queue.Enqueue(edge, edge.GetCapacity());
+                    }
                 }
-            }
-            //Run Kruskal Main-Algorithm-Part
-            while (pr_queue.Count != 0 || set_collection.NUMBER_OF_SETS() > 1)
+            });
+            Diagnostic.MeasureTime(() =>
             {
-                Edge edge = pr_queue.Dequeue();
-                if (set_collection.union(edge.V_FROM, edge.V_TO))
+                System.Console.WriteLine("Kruskal: Running through Edges in PriorityQueue");
+                //Run Kruskal Main-Algorithm-Part
+                while (pr_queue.Count != 0 || set_collection.NUMBER_OF_SETS() > 1)
                 {
-                    Capacity_Sum += edge.GetCapacity();
-                    if (creategraph)
-                        G_neu.AddEdge(edge.V_FROM, edge.V_TO, edge.GetCapacity());
+                    Edge edge = pr_queue.Dequeue();
+                    if (set_collection.union(edge.V_FROM, edge.V_TO))
+                    {
+                        Capacity_Sum += edge.GetCapacity();
+                        if (creategraph)
+                            G_neu.AddEdge(edge.V_FROM, edge.V_TO, edge.GetCapacity());
+                    }
                 }
-            }
+            });
             return new Tuple<float, Graph>(Capacity_Sum, G_neu);
         }
 
