@@ -47,24 +47,23 @@ namespace MA.Collections
 
                 if (nodes_a != null || nodes_b != null)
                 {
-                    if (node_a_setID < node_b_setID)
+
+                    if (nodes_a.Count <= nodes_b.Count)
                     {
-                        foreach (int node in nodes_b)
+                        foreach (int node in nodes_a)
                         {
-                            nodes_a.Add(node);
-                            setIDs[node] = node_a_setID;
+                            setIDs[node] = node_b_setID;
                         }
-                        removeSet(node_b_setID);
+                        nodes_b.AddRange(nodes_a);
                         return true;
                     }
                     else
                     {
-                        foreach (int node in nodes_a)
+                        foreach (int node in nodes_b)
                         {
-                            nodes_b.Add(node);
-                            setIDs[node] = node_b_setID;
+                            setIDs[node] = node_a_setID;
                         }
-                        removeSet(node_a_setID);
+                        nodes_a.AddRange(nodes_b);
                         return true;
                     }
                 }

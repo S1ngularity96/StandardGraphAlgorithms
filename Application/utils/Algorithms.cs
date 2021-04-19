@@ -1,4 +1,5 @@
 using System;
+using System.Runtime;
 using System.Collections.Generic;
 using MA.Interfaces;
 using MA.Collections;
@@ -89,47 +90,61 @@ namespace MA
 
         public static Tuple<float, Graph> Prim(Graph g, bool creategraph)
         {
-            //Prepare Graph for Prim
-            int NUMBER_OF_NODES = g.NUMBER_OF_NODES();
-            Graph G_neu = new UndirectedGraph();
-            float Capacity_Sum = 0.0f;
-            g.UnmarkAllNodes();
-            HashSet<Edge> visited_edges = new HashSet<Edge>();
-
-            if (creategraph)
-                G_neu.nodes = new Collections.NodeSet(NUMBER_OF_NODES);
-            //Prepare Queue
-            Node node_random = g.GetFirstUnmarkedNode();
-            node_random.mark();
-            SimplePriorityQueue<Edge> pr_queue = new SimplePriorityQueue<Edge>();
-            foreach (Edge edge in node_random.edges)
+            if (GC.TryStartNoGCRegion(1024 * 1024 * 64))
             {
-                pr_queue.Enqueue(edge, edge.GetCapacity());
-            }
-
-            //Iterations
-            while (pr_queue.Count != 0)
-            {
-                Edge edge = pr_queue.Dequeue();
-                if (!g.nodes[edge.V_TO].isMarked())
+                try
                 {
-                    visited_edges.Add(edge);
-                    Node node = g.nodes[edge.V_TO];
-                    node.mark();
-                    if (creategraph)
-                        G_neu.AddEdge(edge.V_FROM, edge.V_TO, edge.GetCapacity());
 
-                    Capacity_Sum = Capacity_Sum + edge.GetCapacity();
-                    foreach (Edge neigbour_edge in node.edges)
+                    //Prepare Graph for Prim
+                    int NUMBER_OF_NODES = g.NUMBER_OF_NODES();
+                    Graph G_neu = new UndirectedGraph();
+                    float Capacity_Sum = 0.0f;
+                    g.UnmarkAllNodes();
+
+                    if (creategraph)
+                        G_neu.nodes = new Collections.NodeSet(NUMBER_OF_NODES);
+                    //Prepare Queue
+                    Node node_random = g.GetFirstUnmarkedNode();
+                    node_random.mark();
+                    SimplePriorityQueue<Edge> pr_queue = new SimplePriorityQueue<Edge>();
+                    foreach (Edge edge in node_random.edges)
                     {
-                        if (!visited_edges.Contains(neigbour_edge))
+                        pr_queue.Enqueue(edge, edge.GetCapacity());
+                    }
+
+                    //Iterations
+                    while (pr_queue.Count != 0)
+                    {
+                        Edge edge = pr_queue.Dequeue();
+                        if (!g.nodes[edge.V_TO].isMarked())
                         {
-                            pr_queue.Enqueue(neigbour_edge, neigbour_edge.GetCapacity());
+                            Node node = g.nodes[edge.V_TO];
+                            node.mark();
+                            if (creategraph)
+                                G_neu.AddEdge(edge.V_FROM, edge.V_TO, edge.GetCapacity());
+
+                            Capacity_Sum = Capacity_Sum + edge.GetCapacity();
+                            foreach (Edge neigbour_edge in node.edges)
+                            {
+                                if (!g.nodes[neigbour_edge.V_TO].isMarked())
+                                {
+                                    pr_queue.Enqueue(neigbour_edge, neigbour_edge.GetCapacity());
+                                }
+                            }
                         }
                     }
+
+                    return new Tuple<float, Graph>(Capacity_Sum, G_neu);
+                }
+                finally
+                {
+                    GC.EndNoGCRegion();
                 }
             }
-            return new Tuple<float, Graph>(Capacity_Sum, G_neu);
+            else
+            {
+                throw new Exception("Could not allocate enough RAM");
+            }
         }
 
         public static Tuple<float, Graph> Kruskal(Graph g, bool creategraph)
@@ -139,38 +154,53 @@ namespace MA
             Graph G_neu = new UndirectedGraph();
             float Capacity_Sum = 0.0f;
 
-            if (creategraph)
-                G_neu.nodes = new Collections.NodeSet(NUMBER_OF_NODES);
+            if (GC.TryStartNoGCRegion(1024 * 1024 * 64))
+            {
+                try
+                {
+                    if (creategraph)
+                        G_neu.nodes = new Collections.NodeSet(NUMBER_OF_NODES);
 
-            SimplePriorityQueue<Edge> pr_queue = new SimplePriorityQueue<Edge>();
-            DisjointSetCollection set_collection = new DisjointSetCollection(NUMBER_OF_NODES);
-            //Put all Edges in Priority Queue
-            Diagnostic.MeasureTime(() =>
-            {
-                System.Console.WriteLine("Kruskal: Adding adges to PriorityQueue");
-                foreach (Node node in g.nodes.Values)
-                {
-                    foreach (Edge edge in node.edges)
+                    SimplePriorityQueue<Edge> pr_queue = new SimplePriorityQueue<Edge>();
+                    DisjointSetCollection set_collection = new DisjointSetCollection(NUMBER_OF_NODES);
+                    //Put all Edges in Priority Queue
+                    Diagnostic.MeasureTime(() =>
                     {
-                        pr_queue.Enqueue(edge, edge.GetCapacity());
-                    }
-                }
-            });
-            Diagnostic.MeasureTime(() =>
-            {
-                System.Console.WriteLine("Kruskal: Running through Edges in PriorityQueue");
-                //Run Kruskal Main-Algorithm-Part
-                while (pr_queue.Count != 0 || set_collection.NUMBER_OF_SETS() > 1)
-                {
-                    Edge edge = pr_queue.Dequeue();
-                    if (set_collection.union(edge.V_FROM, edge.V_TO))
+                        System.Console.WriteLine("Kruskal: Adding adges to PriorityQueue");
+                        foreach (Node node in g.nodes.Values)
+                        {
+                            foreach (Edge edge in node.edges)
+                            {
+                                pr_queue.Enqueue(edge, edge.GetCapacity());
+                            }
+                        }
+                    });
+                    Diagnostic.MeasureTime(() =>
                     {
-                        Capacity_Sum += edge.GetCapacity();
-                        if (creategraph)
-                            G_neu.AddEdge(edge.V_FROM, edge.V_TO, edge.GetCapacity());
-                    }
+                        System.Console.WriteLine("Kruskal: Running through Edges in PriorityQueue");
+                        //Run Kruskal Main-Algorithm-Part
+                        while (pr_queue.Count != 0 && set_collection.NUMBER_OF_SETS() > 1)
+                        {
+                            Edge edge = pr_queue.Dequeue();
+                            if (set_collection.union(edge.V_FROM, edge.V_TO))
+                            {
+                                Capacity_Sum += edge.GetCapacity();
+                                if (creategraph)
+                                    G_neu.AddEdge(edge.V_FROM, edge.V_TO, edge.GetCapacity());
+                            }
+                        }
+                    });
                 }
-            });
+                finally
+                {
+                    GC.EndNoGCRegion();
+                }
+            }
+            else
+            {
+                throw new Exception("Could not allocate enough RAM");
+            }
+
             return new Tuple<float, Graph>(Capacity_Sum, G_neu);
         }
 
