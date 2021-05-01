@@ -9,3 +9,9 @@
 ### MST
 - [x] Prim
 - [x] Kruskal
+
+### TSP
+- [x] Nächster Nachbar
+- [x] Doppelter-Baum
+- [ ] Alle Touren durchsuchen
+- [ ] Branch&Bound
