@@ -19,6 +19,24 @@ namespace MA
             return neighbours;
         }
 
+        public static void PrintTourWithCosts(List<Node> tour, float cost)
+        {
+            List<Node> copy = new List<Node>(tour);
+            System.Console.WriteLine($"Tour with the cost of {cost}");
+            System.Console.Write("{ ");
+
+            while (copy.Count > 1)
+            {
+                System.Console.Write($"{copy[0].ID} -> ");
+                copy.RemoveAt(0);
+            }
+            if (copy.Count == 1)
+            {
+                System.Console.Write($"{copy[0].ID}");
+            }
+            System.Console.WriteLine(" }");
+        }
+
 
     }
 }

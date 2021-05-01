@@ -4,6 +4,7 @@ using MA.Helper;
 using CommandLine;
 using System;
 using System.Collections.Generic;
+
 namespace MA
 {
     class Program
@@ -29,8 +30,8 @@ namespace MA
             System.Console.WriteLine(g);
             Diagnostic.MeasureTime(() =>
             {
-                var result = Algorithms.Prim(g, creategraph: false);
-                System.Console.WriteLine($"Sum of Edges is {result.Item1}");
+                var result = Algorithms.DoubleTree(g, 0);
+                GraphUtils.PrintTourWithCosts(result.Item1, result.Item2);
             });
         }
 

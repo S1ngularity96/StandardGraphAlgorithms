@@ -1,10 +1,10 @@
 using System;
-using System.Runtime;
 using System.Collections.Generic;
 using MA.Interfaces;
 using MA.Collections;
 using MA.Classes;
 using MA.Helper;
+using MA.Exceptions;
 using Priority_Queue;
 namespace MA
 {
@@ -203,6 +203,165 @@ namespace MA
 
             return new Tuple<float, Graph>(Capacity_Sum, G_neu);
         }
+
+        ///<summary></summary>
+        ///<returns>Tuple with the Tourlist as the first element and the costs as the second element</returns>
+        public static Tuple<List<Node>, float> NearestNeighbor(Graph g, int NODE_S)
+        {
+            List<Node> Tour = new List<Node>();
+            float tourCosts = 0.0f;
+
+            int NUMBER_OF_NODES = g.NUMBER_OF_NODES();
+            Node currentNode = g.nodes[NODE_S];
+            currentNode.mark();
+            Tour.Add(currentNode);
+            int visited = 1;
+
+            while (visited != NUMBER_OF_NODES)
+            {
+                Node neighbour = null;
+                float cost = float.PositiveInfinity;
+                foreach (Edge edge in currentNode.edges)
+                {
+                    if (!g.nodes[edge.V_TO].isMarked() && edge.GetCapacity() <= cost)
+                    {
+                        neighbour = g.nodes[edge.V_TO];
+                        cost = edge.GetCapacity();
+                    }
+                }
+                neighbour.mark();
+                tourCosts += cost;
+                Tour.Add(neighbour);
+                currentNode = neighbour;
+                visited++;
+            }
+            //Close Circle
+            foreach (Edge edge in currentNode.edges)
+            {
+                if (edge.V_TO == NODE_S)
+                {
+                    System.Console.WriteLine(edge.V_TO);
+                    tourCosts += edge.GetCapacity();
+                    Tour.Add(g.nodes[NODE_S]);
+                    return new Tuple<List<Node>, float>(Tour, tourCosts);
+                }
+            }
+            throw new GraphException("NearestNeighbor: Could not find a Tour!");
+        }
+
+
+        public static Tuple<List<Node>, float> DoubleTree(Graph g, int NODE_S)
+        {
+            List<Node> Tour = new List<Node>();
+            float tourCosts = 0.0f;
+            Graph MST_G = Kruskal(g, creategraph: true).Item2;
+            System.Console.WriteLine(MST_G);
+
+            Node node = MST_G.nodes[NODE_S];
+            //Construct Euler Graph
+
+            node.mark();
+
+            List<Edge>.Enumerator enumerator = node.edges.GetEnumerator();
+            Stack<List<Edge>.Enumerator> stack = new Stack<List<Edge>.Enumerator>();
+            Queue<Edge> edgeQueue = new Queue<Edge>();
+            stack.Push(enumerator);
+
+            //Create Euler-Circle
+            while (stack.Count != 0)
+            {
+                var edge_loop_enumerator = stack.Pop();
+
+                if (edge_loop_enumerator.Current != null)
+                {
+#if debug
+                    System.Console.WriteLine($"b: {edge_loop_enumerator.Current.V_TO} -> {edge_loop_enumerator.Current.V_FROM}");
+#endif
+                    edgeQueue.Enqueue(new Edge(
+                        edge_loop_enumerator.Current.V_TO,
+                        edge_loop_enumerator.Current.V_FROM,
+                        edge_loop_enumerator.Current.GetCapacity()));
+                }
+                while (edge_loop_enumerator.MoveNext())
+                {
+                    if (!MST_G.nodes[edge_loop_enumerator.Current.V_TO].isMarked())
+                    {
+                        MST_G.nodes[edge_loop_enumerator.Current.V_TO].mark();
+#if debug
+                        System.Console.WriteLine($"f: {edge_loop_enumerator.Current.V_FROM} -> {edge_loop_enumerator.Current.V_TO}");
+#endif
+                        edgeQueue.Enqueue(new Edge(
+                            edge_loop_enumerator.Current.V_FROM,
+                            edge_loop_enumerator.Current.V_TO,
+                            edge_loop_enumerator.Current.GetCapacity()));
+                        stack.Push(edge_loop_enumerator);
+                        stack.Push(MST_G.nodes[edge_loop_enumerator.Current.V_TO].edges.GetEnumerator());
+                        break;
+                    }
+                }
+            }
+
+            g.UnmarkAllNodes();
+            while (edgeQueue.Count != 0)
+            {
+                Edge edge = edgeQueue.Dequeue();
+                if (edgeQueue.Count == 0)
+                {
+                    if (edge.V_TO == NODE_S)
+                    {
+                        Tour.Add(g.nodes[edge.V_TO]);
+                        tourCosts += edge.GetCapacity();
+                    }
+                    else
+                    {
+                        throw new GraphException("DoubleTree: Something went wrong. Could not find a Tour");
+                    }
+                }
+                else
+                {
+                    if (!g.nodes[edge.V_FROM].isMarked() && !g.nodes[edge.V_TO].isMarked())
+                    {
+                        g.nodes[edge.V_FROM].mark();
+                        g.nodes[edge.V_TO].mark();
+                        Tour.Add(g.nodes[edge.V_FROM]);
+                        Tour.Add(g.nodes[edge.V_TO]);
+                        tourCosts += edge.GetCapacity();
+                    }
+                    else if (g.nodes[edge.V_FROM].isMarked() && !g.nodes[edge.V_TO].isMarked())
+                    {
+                        g.nodes[edge.V_TO].mark();
+                        Tour.Add(g.nodes[edge.V_TO]);
+                        tourCosts += edge.GetCapacity();
+                    }
+                    else if (g.nodes[edge.V_FROM].isMarked() && g.nodes[edge.V_TO].isMarked())
+                    {
+                        Node tmpNode = g.nodes[edge.V_FROM];
+                        while (edgeQueue.Count > 1)
+                        {
+                            Edge nextEdge = edgeQueue.Dequeue();
+                            if (!g.nodes[nextEdge.V_TO].isMarked())
+                            {
+                                Tour.Add(g.nodes[nextEdge.V_TO]);
+                                g.nodes[nextEdge.V_TO].mark();
+
+                                foreach (Edge tmpEdge in tmpNode.edges)
+                                {
+                                    if (tmpEdge.V_FROM == edge.V_FROM && nextEdge.V_TO == tmpEdge.V_TO)
+                                    {
+                                        tourCosts += tmpEdge.GetCapacity();
+                                    }
+                                }
+                                break;
+                            }
+                        }
+                    }
+
+                }
+            }
+
+            return new Tuple<List<Node>, float>(Tour, tourCosts);
+        }
+
 
     }
 }
