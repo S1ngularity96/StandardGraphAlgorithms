@@ -22,7 +22,7 @@ namespace MA
         public static void PrintTourWithCosts(List<Node> tour, float cost)
         {
             List<Node> copy = new List<Node>(tour);
-            System.Console.WriteLine($"Tour with the cost of {cost}");
+            System.Console.WriteLine($"Tour with the cost of {cost} and {copy.Count} stations");
             System.Console.Write("{ ");
 
             while (copy.Count > 1)

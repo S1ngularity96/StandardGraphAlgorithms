@@ -30,7 +30,7 @@ namespace MA
             System.Console.WriteLine(g);
             Diagnostic.MeasureTime(() =>
             {
-                var result = Algorithms.DoubleTree(g, 0);
+                var result = Algorithms.DoubleTree(g, 0, Algorithms.MST.PRIM);
                 GraphUtils.PrintTourWithCosts(result.Item1, result.Item2);
             });
         }

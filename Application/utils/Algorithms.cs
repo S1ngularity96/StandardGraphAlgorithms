@@ -10,6 +10,19 @@ namespace MA
 {
     public static class Algorithms
     {
+        [Flags]
+        public enum MST
+        {
+            KRUSKAL = 0,
+            PRIM = 1
+        }
+        public enum TSP
+        {
+            NEARESTNEIGHBOR = 0,
+            DOUBLETREE = 1,
+            ALLTOURS = 2,
+            BRANCHANDBOUND = 3
+        }
         public static int BreadthSearch(Graph g)
         {
             System.Console.WriteLine("Counting Graph-Components ...");
@@ -166,7 +179,9 @@ namespace MA
                     //Put all Edges in Priority Queue
                     Diagnostic.MeasureTime(() =>
                     {
+#if debug
                         System.Console.WriteLine("Kruskal: Adding adges to PriorityQueue");
+#endif
                         foreach (Node node in g.nodes.Values)
                         {
                             foreach (Edge edge in node.edges)
@@ -177,7 +192,9 @@ namespace MA
                     });
                     Diagnostic.MeasureTime(() =>
                     {
+#if debug
                         System.Console.WriteLine("Kruskal: Running through Edges in PriorityQueue");
+#endif
                         //Run Kruskal Main-Algorithm-Part
                         while (pr_queue.Count != 0 && set_collection.NUMBER_OF_SETS() > 1)
                         {
@@ -250,16 +267,27 @@ namespace MA
         }
 
 
-        public static Tuple<List<Node>, float> DoubleTree(Graph g, int NODE_S)
+        public static Tuple<List<Node>, float> DoubleTree(Graph g, int NODE_S, MST choice)
         {
             List<Node> Tour = new List<Node>();
             float tourCosts = 0.0f;
-            Graph MST_G = Kruskal(g, creategraph: true).Item2;
-            System.Console.WriteLine(MST_G);
+            Graph MST_G = null;
+            switch (choice)
+            {
+                case MST.KRUSKAL:
+                    System.Console.WriteLine("Using MST-Kruskal");
+                    MST_G = Kruskal(g, creategraph: true).Item2;
+                    break;
+                case MST.PRIM:
+                    System.Console.WriteLine("Using MST-Prim");
+                    MST_G = Prim(g, creategraph: true).Item2;
+                    break;
+                default:
+                    throw new GraphException("Choose between Prim or Kruskal");
+            }
 
-            Node node = MST_G.nodes[NODE_S];
             //Construct Euler Graph
-
+            Node node = MST_G.nodes[NODE_S];
             node.mark();
 
             List<Edge>.Enumerator enumerator = node.edges.GetEnumerator();
@@ -267,7 +295,7 @@ namespace MA
             Queue<Edge> edgeQueue = new Queue<Edge>();
             stack.Push(enumerator);
 
-            //Create Euler-Circle
+            //Create Euler-Circle (Same as DepthTraverse + collecting edges into a queue)
             while (stack.Count != 0)
             {
                 var edge_loop_enumerator = stack.Pop();
