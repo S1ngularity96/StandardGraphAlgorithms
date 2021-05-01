@@ -25,13 +25,38 @@ namespace MA
         static void RunOptions(CLIOptions options)
         {
             ENABLE_TIME_MEASUREMENTS = options.stopwatch;
+            BruteForce(options, BB: true);
+        }
+
+        static void BruteForce(CLIOptions options, bool BB = false)
+        {
             Graph g = new UndirectedGraph();
-            Diagnostic.MeasureTime(() => { g.ReadFromFile(options.File, options.capacity); });
+            g.ReadFromFile(options.File, options.capacity);
             System.Console.WriteLine(g);
             Diagnostic.MeasureTime(() =>
             {
-                var result = Algorithms.DoubleTree(g, 0, Algorithms.MST.PRIM);
-                GraphUtils.PrintTourWithCosts(result.Item1, result.Item2);
+                List<Collections.Tour> touren = null;
+                float min = float.PositiveInfinity;
+                int t_index = 0;
+                if (BB)
+                {
+                    touren = Algorithms.BranchAndBound(g, 0, MAX_TOURS: float.PositiveInfinity);
+                    System.Console.WriteLine(touren[touren.Count - 1]);
+                }
+                else
+                {
+                    touren = Algorithms.BruteForce(g, 0, MAX_TOURS: float.PositiveInfinity);
+                    for (int i_tuple = 0; i_tuple < touren.Count; i_tuple++)
+                    {
+                        var costs = touren[i_tuple].GetCosts();
+                        if (costs < min)
+                        {
+                            t_index = i_tuple;
+                            min = costs;
+                        }
+                    }
+                    System.Console.WriteLine(touren[t_index]);
+                }
             });
         }
 
