@@ -13,5 +13,5 @@
 ### TSP
 - [x] Nächster Nachbar
 - [x] Doppelter-Baum
-- [ ] Alle Touren durchsuchen
-- [ ] Branch&Bound
+- [x] Alle Touren durchsuchen
+- [x] Branch&Bound
