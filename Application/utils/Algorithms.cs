@@ -457,6 +457,7 @@ namespace MA
                 else if (current_tour.GetCosts() < THRESHOLD)
                 {
                     Tuple<List<Edge>.Enumerator, Tour> last = null;
+                    //Dive depth into tree 
                     if (edge_loop_enumerator.MoveNext())
                     {
                         if (!current_tour.ContainsStation(edge_loop_enumerator.Current.V_TO))
@@ -468,7 +469,7 @@ namespace MA
 
                         }
                     }
-
+                    //For all alternative tours
                     while (edge_loop_enumerator.MoveNext())
                     {
                         Tour alternativeTour = current_tour.Copy();
