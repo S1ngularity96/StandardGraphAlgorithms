@@ -257,7 +257,6 @@ namespace MA
             {
                 if (edge.V_TO == NODE_S)
                 {
-                    System.Console.WriteLine(edge.V_TO);
                     tourCosts += edge.GetCapacity();
                     Tour.Add(g.nodes[NODE_S]);
                     return new Tuple<List<Node>, float>(Tour, tourCosts);
@@ -390,6 +389,103 @@ namespace MA
             return new Tuple<List<Node>, float>(Tour, tourCosts);
         }
 
+        public static List<Tour> BruteForce(Graph g, int NODE_S, float MAX_TOURS)
+        {
 
+            Node node = g.nodes[NODE_S];
+            float THRESHOLD = float.PositiveInfinity;
+            var touren = BruceForceIterative(g, node, MAX_TOURS, ref THRESHOLD);
+            return touren;
+        }
+
+        public static List<Tour> BranchAndBound(Graph g, int NODE_S, float MAX_TOURS)
+        {
+            Node node = g.nodes[NODE_S];
+            var result = NearestNeighbor(g, NODE_S);
+            float THRESHOLD = result.Item2;
+            var touren = BruceForceIterative(g, node, MAX_TOURS, ref THRESHOLD);
+            return touren;
+        }
+
+        public static List<Tour> BruceForceIterative(Graph g, Node node, float MAX_TOURS, ref float THRESHOLD)
+        {
+            bool BB = false;
+            if (THRESHOLD != float.PositiveInfinity)
+                BB = true;
+
+            List<Tour> touren = new List<Tour>();
+            int TOURS_FINISHED = 0;
+            List<Edge>.Enumerator enumerator = node.edges.GetEnumerator();
+            Stack<Tuple<List<Edge>.Enumerator, Tour>> stack = new Stack<Tuple<List<Edge>.Enumerator, Tour>>();
+            stack.Push(new Tuple<List<Edge>.Enumerator, Tour>(enumerator, new Tour(node.ID)));
+
+
+            while (stack.Count != 0)
+            {
+                var tuple = stack.Pop();
+                var edge_loop_enumerator = tuple.Item1;
+                var current_tour = tuple.Item2;
+                //Close Tour
+                if (current_tour.CountStations() == g.NUMBER_OF_NODES())
+                {
+                    int lastStation = current_tour.GetLastStation();
+                    foreach (Edge edge in g.nodes[lastStation].edges)
+                    {
+                        if (edge.V_TO == node.ID)
+                        {
+                            current_tour.AddStation(edge.V_TO, edge.GetCapacity());
+                            if (current_tour.GetCosts() < THRESHOLD)
+                            {
+                                if (BB)
+                                    THRESHOLD = current_tour.GetCosts();
+
+                                touren.Add(current_tour);
+                                TOURS_FINISHED++;
+                                if (TOURS_FINISHED >= MAX_TOURS)
+                                {
+                                    return touren;
+                                }
+                            }
+                            break;
+                        }
+                    }
+                    if (!current_tour.IsFinished())
+                    {
+                        throw new GraphException("Could not finish the Tour");
+                    }
+                }
+                else if (current_tour.GetCosts() < THRESHOLD)
+                {
+                    Tuple<List<Edge>.Enumerator, Tour> last = null;
+                    if (edge_loop_enumerator.MoveNext())
+                    {
+                        if (!current_tour.ContainsStation(edge_loop_enumerator.Current.V_TO))
+                        {
+                            current_tour.AddStation(edge_loop_enumerator.Current.V_TO, edge_loop_enumerator.Current.GetCapacity());
+                            if (current_tour.GetCosts() < THRESHOLD)
+                                last = new Tuple<List<Edge>.Enumerator, Tour>(g.nodes[edge_loop_enumerator.Current.V_TO].edges.GetEnumerator(), current_tour);
+
+
+                        }
+                    }
+
+                    while (edge_loop_enumerator.MoveNext())
+                    {
+                        Tour alternativeTour = current_tour.Copy();
+                        if (!alternativeTour.ContainsStation(edge_loop_enumerator.Current.V_TO))
+                        {
+                            alternativeTour.AddStation(edge_loop_enumerator.Current.V_TO, edge_loop_enumerator.Current.GetCapacity());
+                            if (current_tour.GetCosts() < THRESHOLD)
+                                stack.Push(new Tuple<List<Edge>.Enumerator, Tour>(g.nodes[edge_loop_enumerator.Current.V_TO].edges.GetEnumerator(), alternativeTour));
+                        }
+                    }
+                    if (last != null)
+                    {
+                        stack.Push(last);
+                    }
+                }
+            }
+            return touren;
+        }
     }
 }
