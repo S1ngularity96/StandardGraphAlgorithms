@@ -221,7 +221,7 @@ namespace MA
             return new Tuple<float, Graph>(Capacity_Sum, G_neu);
         }
 
-        ///<summary></summary>
+        ///<summary>Executes NearestNeighbor-Algorithm on Graph g and at starting node NODE_S</summary>
         ///<returns>Tuple with the Tourlist as the first element and the costs as the second element</returns>
         public static Tuple<List<Node>, float> NearestNeighbor(Graph g, int NODE_S)
         {
@@ -238,6 +238,7 @@ namespace MA
             {
                 Node neighbour = null;
                 float cost = float.PositiveInfinity;
+                //Find Neighbor with smallest cost
                 foreach (Edge edge in currentNode.edges)
                 {
                     if (!g.nodes[edge.V_TO].isMarked() && edge.GetCapacity() <= cost)
@@ -265,7 +266,8 @@ namespace MA
             throw new GraphException("NearestNeighbor: Could not find a Tour!");
         }
 
-
+        ///<summary>Executes DoubleTree-Algorithm on Graph g at starting node NODS_S with MST-Algorithm</summary>
+        ///<returns>Tuple with the Tourlist as the first element and the costs as the second element</returns>
         public static Tuple<List<Node>, float> DoubleTree(Graph g, int NODE_S, MST choice)
         {
             List<Node> Tour = new List<Node>();
@@ -298,7 +300,7 @@ namespace MA
             while (stack.Count != 0)
             {
                 var edge_loop_enumerator = stack.Pop();
-
+                //Backtracking
                 if (edge_loop_enumerator.Current != null)
                 {
 #if debug
@@ -309,6 +311,7 @@ namespace MA
                         edge_loop_enumerator.Current.V_FROM,
                         edge_loop_enumerator.Current.GetCapacity()));
                 }
+                //Depth-Traverse
                 while (edge_loop_enumerator.MoveNext())
                 {
                     if (!MST_G.nodes[edge_loop_enumerator.Current.V_TO].isMarked())
@@ -360,6 +363,7 @@ namespace MA
                         Tour.Add(g.nodes[edge.V_TO]);
                         tourCosts += edge.GetCapacity();
                     }
+                    //find next unmarked node
                     else if (g.nodes[edge.V_FROM].isMarked() && g.nodes[edge.V_TO].isMarked())
                     {
                         Node tmpNode = g.nodes[edge.V_FROM];
@@ -389,6 +393,9 @@ namespace MA
             return new Tuple<List<Node>, float>(Tour, tourCosts);
         }
 
+        ///<summary>Execute BruteForce-Algorithm to find all possible Tours in Graph G from starting node NODE_S</summary>
+        ///<param name="MAX_TOURS">Choose the maximum size of Tourlist.</param>
+        ///<returns>Returns List of Tours</returns>
         public static List<Tour> BruteForce(Graph g, int NODE_S, float MAX_TOURS)
         {
 
@@ -398,6 +405,7 @@ namespace MA
             return touren;
         }
 
+        ///<summary>Execute BranchAndBound-Algorithm to find possible Tours in Graph G from starting node NODE_S</summary>
         public static List<Tour> BranchAndBound(Graph g, int NODE_S, float MAX_TOURS)
         {
             Node node = g.nodes[NODE_S];
