@@ -16,12 +16,19 @@ namespace MA
             KRUSKAL = 0,
             PRIM = 1
         }
+        [Flags]
         public enum TSP
         {
             NEARESTNEIGHBOR = 0,
             DOUBLETREE = 1,
             ALLTOURS = 2,
             BRANCHANDBOUND = 3
+        }
+        [Flags]
+        public enum SP
+        {
+            DIJKSTRA = 0,
+            BELLMAN = 1
         }
         public static int BreadthSearch(Graph g)
         {
@@ -496,5 +503,67 @@ namespace MA
             }
             return touren;
         }
+
+        ///<summary>Executes Dijkstra Algorithm and returns the shortest path or the shortest path tree</summary>
+        ///<param name="g">Graph</param>
+        ///<param name="NODE_S">Start node</param>
+        ///<param name="NODE_T">Optional paramater for target node. If null, shortest path tree will be created.</param>
+        public static GraphUtils.SPValues DijkstraShortestPath(Graph g, int NODE_S, int? NODE_T)
+        {
+
+            GraphUtils.SPValues spvalues = GraphUtils.InitSP(g, NODE_S, SP.DIJKSTRA);
+            //1. stopcondition
+            while (spvalues.VQueue.Count > 0)
+            {
+                int firstNode = spvalues.VQueue.Dequeue();
+                Node MIN_NODE = g.nodes[firstNode];
+                //2. stopcondition
+                if (MIN_NODE.DISTANCE == float.PositiveInfinity)
+                {
+                    return spvalues;
+                }
+                MIN_NODE.mark();
+                //Constructing Tree
+                if (MIN_NODE.Predecessor != null)
+                {
+                    if (g.nodes[MIN_NODE.Predecessor.V_FROM].isMarked())
+                    {
+                        if (!spvalues.G_neu.nodes.ContainsKey(MIN_NODE.Predecessor.V_FROM))
+                            spvalues.G_neu.nodes.Add(MIN_NODE.Predecessor.V_FROM, new Node());
+
+                        spvalues.G_neu.nodes.Add(MIN_NODE.ID, new Node());
+                        g.AddEdge(MIN_NODE.Predecessor.V_FROM, MIN_NODE.Predecessor.V_TO, MIN_NODE.Predecessor.GetCapacity());
+                    }
+                }
+                //3. stopcondition
+                if (NODE_T != null)
+                    if (MIN_NODE.ID == NODE_T)
+                    {
+                        spvalues.DISTANCE = g.nodes[NODE_T.GetValueOrDefault()].DISTANCE;
+                        return spvalues;
+                    }
+
+                //Go through all neighbours and update distances if possible
+                foreach (Edge edge in MIN_NODE.edges)
+                {
+                    if (spvalues.VQueue.Contains(edge.V_TO))
+                    {
+                        float calculatedDistance = edge.GetCapacity() + MIN_NODE.DISTANCE;
+                        if (calculatedDistance < g.nodes[edge.V_TO].DISTANCE)
+                        {
+                            g.nodes[edge.V_TO].DISTANCE = calculatedDistance;
+                            g.nodes[edge.V_TO].Predecessor = edge;
+                            spvalues.VQueue.UpdatePriority(edge.V_TO, calculatedDistance);
+                        }
+                    }
+                }
+
+            }
+            if (spvalues.VQueue.Count == 0)
+                return spvalues;
+
+            throw new GraphException("Could not find shortest path");
+        }
+
     }
 }

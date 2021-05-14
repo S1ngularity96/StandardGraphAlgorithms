@@ -25,7 +25,8 @@ namespace MA
         static void RunOptions(CLIOptions options)
         {
             ENABLE_TIME_MEASUREMENTS = options.stopwatch;
-            BruteForce(options, BB: true);
+            ShortestPath(options);
+
         }
 
         static void BruteForce(CLIOptions options, bool BB = false)
@@ -46,6 +47,7 @@ namespace MA
                 else
                 {
                     touren = Algorithms.BruteForce(g, 0, MAX_TOURS: float.PositiveInfinity);
+                    System.Console.WriteLine($"{touren.Count} tours found");
                     for (int i_tuple = 0; i_tuple < touren.Count; i_tuple++)
                     {
                         var costs = touren[i_tuple].GetCosts();
@@ -58,6 +60,20 @@ namespace MA
                     System.Console.WriteLine(touren[t_index]);
                 }
             });
+        }
+
+        static void ShortestPath(CLIOptions options)
+        {
+            Graph g = new UndirectedGraph();
+            g.ReadFromFile(options.File, options.capacity);
+            GraphUtils.SPValues sP = new GraphUtils.SPValues();
+            Diagnostic.MeasureTime(() =>
+            {
+                sP = Algorithms.DijkstraShortestPath(g, 0, 1);
+            });
+
+            System.Console.WriteLine($"Wege1 als gerichteter Graph: von Knoten 0 zu Knoten 1: Länge {sP.DISTANCE}");
+
         }
 
         static void HandleParseError(IEnumerable<Error> errors)

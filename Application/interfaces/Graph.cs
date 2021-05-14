@@ -15,6 +15,11 @@ namespace MA.Interfaces
         }
         public int NUMBER_OF_EDGES { get; set; }
 
+        public Graph()
+        {
+            this.nodes = new NodeSet();
+        }
+
         public void UnmarkAllNodes()
         {
             foreach (KeyValuePair<int, Node> pair in nodes)
