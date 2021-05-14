@@ -15,3 +15,7 @@
 - [x] Doppelter-Baum
 - [x] Alle Touren durchsuchen
 - [x] Branch&Bound
+
+### SP
+- [x] Dijkstra
+- [ ] Moore-Bellman-Ford
