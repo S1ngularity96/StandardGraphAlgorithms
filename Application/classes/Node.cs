@@ -5,6 +5,8 @@ namespace MA.Classes
     {
         public int ID { get; set; }
         private bool V_MARKED { get; set; }
+        public float DISTANCE { get; set; }
+        public Edge Predecessor = null;
         public List<Edge> edges = new List<Edge>();
 
         public Node() { }
@@ -23,7 +25,7 @@ namespace MA.Classes
             edges.Add(new Edge(V_FROM, V_TO, capacity));
         }
 
-#warning Will not work with undirected edges
+#warning If is undirected Graph. Make also sure to remove same edge from other node.
         public void RemoveEdge(int node, ref int NUMBER_OF_EDGES)
         {
             int SUM_EDGES = edges.Count;
@@ -55,6 +57,19 @@ namespace MA.Classes
         }
         #endregion
 
+
+        public override bool Equals(object obj)
+        {
+            if (obj.GetType().Equals(this.GetType()))
+            {
+                Node other = (Node)obj;
+                if (other.ID == this.ID)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
 
         public override string ToString()
         {
