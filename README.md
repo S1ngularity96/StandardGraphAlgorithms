@@ -18,4 +18,4 @@
 
 ### SP
 - [x] Dijkstra
-- [ ] Moore-Bellman-Ford
+- [x] Moore-Bellman-Ford
