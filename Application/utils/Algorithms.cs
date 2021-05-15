@@ -508,7 +508,7 @@ namespace MA
         ///<param name="g">Graph</param>
         ///<param name="NODE_S">Start node</param>
         ///<param name="NODE_T">Optional paramater for target node. If null, shortest path tree will be created.</param>
-        public static GraphUtils.SPValues DijkstraShortestPath(Graph g, int NODE_S, int? NODE_T)
+        public static GraphUtils.SPValues DSP(Graph g, int NODE_S, int? NODE_T)
         {
 
             GraphUtils.SPValues spvalues = GraphUtils.InitSP(g, NODE_S, SP.DIJKSTRA);
@@ -565,5 +565,60 @@ namespace MA
             throw new GraphException("Could not find shortest path");
         }
 
+
+        public static GraphUtils.SPValues BFSP(Graph g, int NODE_S, int? NODE_T)
+        {
+            //Step 1
+            GraphUtils.SPValues spvalues = GraphUtils.InitSP(g, NODE_S, SP.BELLMAN);
+            List<Edge> edges = spvalues.edges;
+            int tries = g.NUMBER_OF_NODES() - 1;
+            //Step 2
+            for (int repeat = 0; repeat <= tries; repeat++)
+            {
+                bool updated = false;
+
+                foreach (Edge edge in edges)
+                {
+                    if (g.nodes[edge.V_FROM].DISTANCE != float.PositiveInfinity)
+                    {
+                        float calculatedDistance = g.nodes[edge.V_FROM].DISTANCE + edge.GetCapacity();
+                        if (calculatedDistance < g.nodes[edge.V_TO].DISTANCE)
+                        {
+                            updated = true;
+                            g.nodes[edge.V_TO].DISTANCE = calculatedDistance;
+                            g.nodes[edge.V_TO].Predecessor = edge;
+                        }
+                    }
+                }
+                if (!updated) { break; }
+            }
+            //Step 3
+            foreach (Edge edge in edges)
+            {
+
+                float calculatedDistance = g.nodes[edge.V_FROM].DISTANCE + edge.GetCapacity();
+                if (calculatedDistance < g.nodes[edge.V_TO].DISTANCE)
+                {
+                    spvalues.negativeCycleEdge = edge;
+                    return spvalues;
+                }
+                //Constructing Tree
+                if (g.nodes[edge.V_TO].Predecessor != null)
+                {
+                    if (!spvalues.G_neu.nodes.ContainsKey(edge.V_TO))
+                        spvalues.G_neu.nodes.Add(edge.V_TO, new Node(edge.V_TO));
+                    if (!spvalues.G_neu.nodes.ContainsKey(g.nodes[edge.V_TO].Predecessor.V_FROM))
+                        spvalues.G_neu.nodes.Add(g.nodes[edge.V_TO].Predecessor.V_FROM, new Node(g.nodes[edge.V_TO].Predecessor.V_FROM));
+
+                    spvalues.G_neu.AddEdge(g.nodes[edge.V_TO].Predecessor.V_FROM, edge.V_TO, g.nodes[edge.V_TO].Predecessor.GetCapacity());
+                }
+
+            }
+
+            if (NODE_T != null)
+                spvalues.DISTANCE = g.nodes[NODE_T.GetValueOrDefault()].DISTANCE;
+
+            return spvalues;
+        }
     }
 }

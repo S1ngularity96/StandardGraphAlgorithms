@@ -64,15 +64,24 @@ namespace MA
 
         static void ShortestPath(CLIOptions options)
         {
-            Graph g = new UndirectedGraph();
+            Graph g = new DirectedGraph();
             g.ReadFromFile(options.File, options.capacity);
             GraphUtils.SPValues sP = new GraphUtils.SPValues();
             Diagnostic.MeasureTime(() =>
             {
-                sP = Algorithms.DijkstraShortestPath(g, 0, 1);
+                sP = Algorithms.BFSP(g, 0, 1);
+                if (sP.negativeCycleEdge != null)
+                {
+                    System.Console.WriteLine("es gibt einen negativen Zykel");
+                }
+                else
+                {
+                    System.Console.WriteLine($"Wege2 als gerichteter Graph: von Knoten 0 zu Knoten 1: Länge {sP.DISTANCE}");
+                    System.Console.WriteLine(sP.G_neu.NUMBER_OF_NODES());
+                }
+
             });
 
-            System.Console.WriteLine($"Wege1 als gerichteter Graph: von Knoten 0 zu Knoten 1: Länge {sP.DISTANCE}");
 
         }
 
