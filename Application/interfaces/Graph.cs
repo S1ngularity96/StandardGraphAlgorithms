@@ -1,12 +1,19 @@
 using MA.Collections;
 using MA.Classes;
 using System.Collections.Generic;
+using System;
 using System.IO;
 using System.Globalization;
 namespace MA.Interfaces
 {
     public abstract class Graph
     {
+        [Flags]
+        public enum Direction
+        {
+            directed = 0,
+            undirected = 1
+        }
         public NodeSet nodes = null;
         public int NUMBER_OF_NODES()
         {
@@ -38,13 +45,15 @@ namespace MA.Interfaces
             }
             return null;
         }
-        public void ReadFromFile(string path, bool capacity)
+        public void ReadFromFile(string path, bool capacity, bool log = false)
         {
             if (!File.Exists((path)))
             {
-                return;
+                throw new FileNotFoundException($"{path} does not exist");
             }
-            System.Console.WriteLine($"Importing Graph from file {Path.GetFileName(path)} ...");
+            if (log)
+                System.Console.WriteLine($"Importing Graph from file {Path.GetFileName(path)} ...");
+
             int LINES_READ = 0;
             const int V_FROM = 0;
             const int V_TO = 1;

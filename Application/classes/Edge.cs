@@ -49,7 +49,7 @@ namespace MA.Classes
 
         public override string ToString()
         {
-            return base.ToString();
+            return "{ " + V_FROM + " -> " + V_TO + " }";
         }
 
         public int CompareTo(object obj)

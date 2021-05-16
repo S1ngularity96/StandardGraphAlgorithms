@@ -10,6 +10,7 @@ namespace MA
 {
     public static class Algorithms
     {
+
         [Flags]
         public enum MST
         {
@@ -508,19 +509,19 @@ namespace MA
         ///<param name="g">Graph</param>
         ///<param name="NODE_S">Start node</param>
         ///<param name="NODE_T">Optional paramater for target node. If null, shortest path tree will be created.</param>
-        public static GraphUtils.SPValues DSP(Graph g, int NODE_S, int? NODE_T)
+        public static GraphUtils.DSPResult DSP(Graph g, int NODE_S, int? NODE_T)
         {
 
-            GraphUtils.SPValues spvalues = GraphUtils.InitSP(g, NODE_S, SP.DIJKSTRA);
+            GraphUtils.DSPResult result = GraphUtils.InitDSP(g, NODE_S);
             //1. stopcondition
-            while (spvalues.VQueue.Count > 0)
+            while (result.VQueue.Count > 0)
             {
-                int firstNode = spvalues.VQueue.Dequeue();
+                int firstNode = result.VQueue.Dequeue();
                 Node MIN_NODE = g.nodes[firstNode];
                 //2. stopcondition
                 if (MIN_NODE.DISTANCE == float.PositiveInfinity)
                 {
-                    return spvalues;
+                    return result;
                 }
                 MIN_NODE.mark();
                 //Constructing Tree
@@ -528,10 +529,10 @@ namespace MA
                 {
                     if (g.nodes[MIN_NODE.Predecessor.V_FROM].isMarked())
                     {
-                        if (!spvalues.G_neu.nodes.ContainsKey(MIN_NODE.Predecessor.V_FROM))
-                            spvalues.G_neu.nodes.Add(MIN_NODE.Predecessor.V_FROM, new Node());
+                        if (!result.G_neu.nodes.ContainsKey(MIN_NODE.Predecessor.V_FROM))
+                            result.G_neu.nodes.Add(MIN_NODE.Predecessor.V_FROM, new Node());
 
-                        spvalues.G_neu.nodes.Add(MIN_NODE.ID, new Node());
+                        result.G_neu.nodes.Add(MIN_NODE.ID, new Node());
                         g.AddEdge(MIN_NODE.Predecessor.V_FROM, MIN_NODE.Predecessor.V_TO, MIN_NODE.Predecessor.GetCapacity());
                     }
                 }
@@ -539,38 +540,38 @@ namespace MA
                 if (NODE_T != null)
                     if (MIN_NODE.ID == NODE_T)
                     {
-                        spvalues.DISTANCE = g.nodes[NODE_T.GetValueOrDefault()].DISTANCE;
-                        return spvalues;
+                        result.DISTANCE = g.nodes[NODE_T.GetValueOrDefault()].DISTANCE;
+                        return result;
                     }
 
                 //Go through all neighbours and update distances if possible
                 foreach (Edge edge in MIN_NODE.edges)
                 {
-                    if (spvalues.VQueue.Contains(edge.V_TO))
+                    if (result.VQueue.Contains(edge.V_TO))
                     {
                         float calculatedDistance = edge.GetCapacity() + MIN_NODE.DISTANCE;
                         if (calculatedDistance < g.nodes[edge.V_TO].DISTANCE)
                         {
                             g.nodes[edge.V_TO].DISTANCE = calculatedDistance;
                             g.nodes[edge.V_TO].Predecessor = edge;
-                            spvalues.VQueue.UpdatePriority(edge.V_TO, calculatedDistance);
+                            result.VQueue.UpdatePriority(edge.V_TO, calculatedDistance);
                         }
                     }
                 }
 
             }
-            if (spvalues.VQueue.Count == 0)
-                return spvalues;
+            if (result.VQueue.Count == 0)
+                return result;
 
             throw new GraphException("Could not find shortest path");
         }
 
 
-        public static GraphUtils.SPValues BFSP(Graph g, int NODE_S, int? NODE_T)
+        public static GraphUtils.BFSPResult BFSP(Graph g, int NODE_S, int? NODE_T)
         {
             //Step 1
-            GraphUtils.SPValues spvalues = GraphUtils.InitSP(g, NODE_S, SP.BELLMAN);
-            List<Edge> edges = spvalues.edges;
+            GraphUtils.BFSPResult result = GraphUtils.InitBFSP(g, NODE_S);
+            List<Edge> edges = result.edges;
             int tries = g.NUMBER_OF_NODES() - 1;
             //Step 2
             for (int repeat = 0; repeat <= tries; repeat++)
@@ -599,26 +600,26 @@ namespace MA
                 float calculatedDistance = g.nodes[edge.V_FROM].DISTANCE + edge.GetCapacity();
                 if (calculatedDistance < g.nodes[edge.V_TO].DISTANCE)
                 {
-                    spvalues.negativeCycleEdge = edge;
-                    return spvalues;
+                    result.negativeCycleEdge = edge;
+                    return result;
                 }
                 //Constructing Tree
                 if (g.nodes[edge.V_TO].Predecessor != null)
                 {
-                    if (!spvalues.G_neu.nodes.ContainsKey(edge.V_TO))
-                        spvalues.G_neu.nodes.Add(edge.V_TO, new Node(edge.V_TO));
-                    if (!spvalues.G_neu.nodes.ContainsKey(g.nodes[edge.V_TO].Predecessor.V_FROM))
-                        spvalues.G_neu.nodes.Add(g.nodes[edge.V_TO].Predecessor.V_FROM, new Node(g.nodes[edge.V_TO].Predecessor.V_FROM));
+                    if (!result.G_neu.nodes.ContainsKey(edge.V_TO))
+                        result.G_neu.nodes.Add(edge.V_TO, new Node(edge.V_TO));
+                    if (!result.G_neu.nodes.ContainsKey(g.nodes[edge.V_TO].Predecessor.V_FROM))
+                        result.G_neu.nodes.Add(g.nodes[edge.V_TO].Predecessor.V_FROM, new Node(g.nodes[edge.V_TO].Predecessor.V_FROM));
 
-                    spvalues.G_neu.AddEdge(g.nodes[edge.V_TO].Predecessor.V_FROM, edge.V_TO, g.nodes[edge.V_TO].Predecessor.GetCapacity());
+                    result.G_neu.AddEdge(g.nodes[edge.V_TO].Predecessor.V_FROM, edge.V_TO, g.nodes[edge.V_TO].Predecessor.GetCapacity());
                 }
 
             }
 
             if (NODE_T != null)
-                spvalues.DISTANCE = g.nodes[NODE_T.GetValueOrDefault()].DISTANCE;
+                result.DISTANCE = g.nodes[NODE_T.GetValueOrDefault()].DISTANCE;
 
-            return spvalues;
+            return result;
         }
     }
 }
