@@ -87,5 +87,19 @@ namespace MA.Interfaces
         }
         public abstract void AddEdge(int n1, int n2, float capacity);
 
+        public int PrintEdges()
+        {
+            int edgesPrinted = 0;
+            foreach (Node node in nodes.Values)
+            {
+                foreach (Edge edge in node.edges)
+                {
+                    System.Console.WriteLine($"V_FROM: {edge.V_FROM}\t\t V_TO:{edge.V_TO}\t\t CAP:{edge.GetCapacity()}\t\t FLOW:\t\t {edge.GetFlow()}");
+                    edgesPrinted++;
+                }
+            }
+            return edgesPrinted;
+        }
+
     }
 }

@@ -20,5 +20,7 @@ namespace MA.Classes
         {
             return $"Directed Graph\n|V| = {nodes.Count}\n|E| = {NUMBER_OF_EDGES}";
         }
+
+        
     }
 }
