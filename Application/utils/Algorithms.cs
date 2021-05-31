@@ -518,7 +518,7 @@ namespace MA
             {
                 int firstNode = result.VQueue.Dequeue();
                 Node MIN_NODE = g.nodes[firstNode];
-                //2. stopcondition
+                //2. stopcondition if Node can't be reached
                 if (MIN_NODE.DISTANCE == float.PositiveInfinity)
                 {
                     return result;
@@ -536,7 +536,7 @@ namespace MA
                         g.AddEdge(MIN_NODE.Predecessor.V_FROM, MIN_NODE.Predecessor.V_TO, MIN_NODE.Predecessor.GetCapacity());
                     }
                 }
-                //3. stopcondition
+                //3. stopcondition if NODE_T found
                 if (NODE_T != null)
                     if (MIN_NODE.ID == NODE_T)
                     {
@@ -558,7 +558,6 @@ namespace MA
                         }
                     }
                 }
-
             }
             if (result.VQueue.Count == 0)
                 return result;
@@ -574,7 +573,7 @@ namespace MA
             List<Edge> edges = result.edges;
             int tries = g.NUMBER_OF_NODES() - 1;
             //Step 2
-            for (int repeat = 0; repeat <= tries; repeat++)
+            for (int repeat = 0; repeat < tries; repeat++)
             {
                 bool updated = false;
 

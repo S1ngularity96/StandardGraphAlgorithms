@@ -46,8 +46,6 @@ namespace MA
             BFSPResult result = new BFSPResult();
             result.G_neu = new DirectedGraph();
             result.edges = new List<Edge>(g.NUMBER_OF_EDGES);
-
-
             foreach (Node node in g.nodes.Values)
             {
                 node.DISTANCE = float.PositiveInfinity;
