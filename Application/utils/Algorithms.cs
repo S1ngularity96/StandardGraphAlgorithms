@@ -620,5 +620,48 @@ namespace MA
 
             return spvalues;
         }
+
+
+        public static float EdmondKarp(Graph g, int S, int T)
+        {
+            int TRIES = 1000000;
+            int CURRENT_TRIE = 0;
+            int printed = 0;
+            g.UnmarkAllNodes();
+            while (TRIES != CURRENT_TRIE)
+            {
+                Graph G_residual = FlowAlgorithms.CreateResidualGraph(g);
+                FlowAlgorithms.AugmentedPath augpath = FlowAlgorithms.BFSPath(G_residual, S, T);
+                
+                if (augpath.pathOfEdges == null)
+                {
+                    float flow = 0.0f;
+                    foreach (Node node in g.nodes.Values)
+                    {
+                        foreach (Edge edge in node.edges)
+                        {
+                            if (edge.V_TO == T)
+                            {
+                                flow += edge.GetCapacity();
+                            }
+                            if (edge.V_FROM == T)
+                            {
+                                flow -= edge.GetCapacity();
+                            }
+                        }
+                    }
+                    return flow;
+                }
+                FlowAlgorithms.UpdateFlows(augpath, g);
+
+                for(int i= 0; i< printed;i++){
+                    System.Console.Write("\r");
+                }
+                printed = g.PrintEdges();
+                CURRENT_TRIE++;
+
+            }
+            throw new GraphException("EdmondKarp Algorithm failed");
+        }
     }
 }

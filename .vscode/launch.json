@@ -13,7 +13,7 @@
             "args": [
                 "-w",
                 "-f",
-                "..\\data\\sp\\Wege1.txt"
+                "${workspaceFolder}/data/flow/Fluss.txt"
             ],
             "cwd": "${workspaceFolder}/Application",
             "console": "internalConsole",

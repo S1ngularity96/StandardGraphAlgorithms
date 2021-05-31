@@ -1,6 +1,7 @@
 ﻿using MA.Interfaces;
 using MA.Classes;
 using MA.Helper;
+using MA.Exceptions;
 using CommandLine;
 using System;
 using System.Collections.Generic;
@@ -25,7 +26,7 @@ namespace MA
         static void RunOptions(CLIOptions options)
         {
             ENABLE_TIME_MEASUREMENTS = options.stopwatch;
-            ShortestPath(options);
+            MaxFlow(options);
 
         }
 
@@ -83,6 +84,22 @@ namespace MA
             });
 
 
+        }
+
+        static void MaxFlow(CLIOptions options)
+        {
+            Graph g = new DirectedGraph();
+            System.Console.WriteLine(options.File);
+            g.ReadFromFile(options.File, options.capacity);
+            try
+            {
+                float maxFlow = Algorithms.EdmondKarp(g, 0, 7);
+                System.Console.WriteLine($"Der maximale fluß beträgt {maxFlow}");
+            }
+            catch (GraphException ex)
+            {
+                System.Console.WriteLine(ex.Message);
+            }
         }
 
         static void HandleParseError(IEnumerable<Error> errors)
