@@ -5,32 +5,30 @@
 - [x] Ungewichteter Graph
 - [x] Gewichteter Graph
   
-  ## Algorithmen
+## Algorithmen
   
-  ### Traversierung
+### Traversierung
 - [x] Tiefensuche  + Zusammenhangskomponenten identifizieren
 - [x] Breitensuche + Zusammenhangskomponenten identifizieren
   
-  ### MST
+### MST
 - [x] Prim
 - [x] Kruskal 
   
-  ### TSP
+  
+### TSP
 - [x] Nächster Nachbar
 - [x] Doppelter-Baum
 - [x] Alle Touren durchsuchen
 - [x] Branch&Bound
 
-  ### SP
-
+### SP
 - [x] Dijkstra
 - [x] Moore-Bellman-Ford
-
-  ### Max-Flows
-
+  
+### Max-Flows
 - [x] Edmond-Karp
 
-  ### Minimum-Cost-Flow
-
+### Minimum-Cost-Flow
 - [ ] Cycle-Canceling-Alg.
 - [ ] Successove-Shortest-Path-Alg
