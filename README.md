@@ -13,26 +13,24 @@
   
   ### MST
 - [x] Prim
-- [x] Kruskal
-
-### TSP
-
+- [x] Kruskal 
+  
+  ### TSP
 - [x] Nächster Nachbar
 - [x] Doppelter-Baum
 - [x] Alle Touren durchsuchen
 - [x] Branch&Bound
 
-### SP
+  ### SP
 
 - [x] Dijkstra
 - [x] Moore-Bellman-Ford
 
-### Max-Flows
+  ### Max-Flows
 
 - [x] Edmond-Karp
 
-### Minimum-Cost-Flow
+  ### Minimum-Cost-Flow
 
 - [ ] Cycle-Canceling-Alg.
-
 - [ ] Successove-Shortest-Path-Alg
