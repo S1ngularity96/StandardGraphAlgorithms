@@ -19,3 +19,6 @@
 ### SP
 - [x] Dijkstra
 - [x] Moore-Bellman-Ford
+
+### Max-Flows
+- [x] Edmond-Karp

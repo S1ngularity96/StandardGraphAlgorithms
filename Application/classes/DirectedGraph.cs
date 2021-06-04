@@ -13,12 +13,28 @@ namespace MA.Classes
             }
             Node n1 = nodes.GetOrAdd(N1);
             n1.AddEdge(N1, N2, capacity);
-            NUMBER_OF_EDGES++;
+
+        }
+
+        public override int NUMBER_OF_EDGES()
+        {
+            int countedEdges = 0;
+            if (this.nodes != null)
+            {
+                foreach (Node n in this.nodes.Values)
+                {
+                    countedEdges += n.edges.Count;
+                }
+            }
+
+            return countedEdges;
         }
 
         public override string ToString()
         {
-            return $"Directed Graph\n|V| = {nodes.Count}\n|E| = {NUMBER_OF_EDGES}";
+            return $"Directed Graph\n|V| = {nodes.Count}\n|E| = {NUMBER_OF_EDGES()}";
         }
+
+
     }
 }

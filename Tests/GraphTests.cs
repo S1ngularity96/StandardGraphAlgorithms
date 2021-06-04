@@ -3,11 +3,19 @@ using MA.Classes;
 using MA.Interfaces;
 using System.Collections.Generic;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace MA.Testing
 {
     public class GraphTests
     {
+        private readonly ITestOutputHelper output;
+
+        public GraphTests(ITestOutputHelper outputHelper)
+        {
+            this.output = outputHelper;
+        }
+
         [Fact]
         public void Graph1()
         {
@@ -15,7 +23,7 @@ namespace MA.Testing
             g.ReadFromFile("C:/Users/Livem/Documents/Programmierprojekte/CSharp/GraphAlgorithms/data/Graph1.txt", false);
 
             Assert.Equal<int>(15, g.NUMBER_OF_NODES());
-            Assert.Equal<int>(17, g.NUMBER_OF_EDGES);
+            Assert.Equal<int>(17, g.NUMBER_OF_EDGES());
             g.UnmarkAllNodes();
             Assert.Equal<int>(3, GraphUtils.GetUnmarkedNeighbours(g, 0).Count);
             g.nodes[0].mark();
@@ -76,6 +84,35 @@ namespace MA.Testing
 
 
 
+        }
+
+        [Fact]
+        public void TestResudialGraph()
+        {
+            int[] nodes = { 0, 1, 2, 3 };
+            int S = 0;
+            int U = 1;
+            int V = 2;
+            int T = 3;
+            Graph g = new DirectedGraph();
+            foreach (var node in nodes) { g.nodes.Add(node, new Node(node)); }
+
+            Edge s_to_u = new Edge(S, U, 2, 2);
+            Edge s_to_v = new Edge(S, V, 0, 3);
+            Edge s_to_t = new Edge(S, T, 1, 1);
+            Edge u_to_v = new Edge(U, V, 1, 2);
+            Edge u_to_t = new Edge(U, T, 1, 3);
+            Edge v_to_t = new Edge(V, T, 1, 1);
+            g.nodes[S].AddEdge(s_to_u);
+            g.nodes[S].AddEdge(s_to_v);
+            g.nodes[S].AddEdge(s_to_t);
+            g.nodes[U].AddEdge(u_to_v);
+            g.nodes[U].AddEdge(u_to_t);
+            g.nodes[V].AddEdge(v_to_t);
+            Graph resudial = FlowAlgorithms.CreateResidualGraph(g);
+            var augmented = FlowAlgorithms.BFSPath(resudial, S, T);
+            Assert.StrictEqual<int>(3, augmented.pathOfEdges.Count);
+            Assert.StrictEqual<float>(1.0f, augmented.minEdge.GetCapacity());
         }
     }
 }

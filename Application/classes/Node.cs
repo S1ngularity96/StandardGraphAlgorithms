@@ -25,6 +25,11 @@ namespace MA.Classes
             edges.Add(new Edge(V_FROM, V_TO, capacity));
         }
 
+        public void AddEdge(Edge edge)
+        {
+            edges.Add(edge);
+        }
+
 #warning If is undirected Graph. Make also sure to remove same edge from other node.
         public void RemoveEdge(int node, ref int NUMBER_OF_EDGES)
         {

@@ -7,51 +7,54 @@ namespace MA
     public static class GraphUtils
     {
         #region Structs
-        public struct SPValues
+        public struct BFSPResult
+        {
+            public Graph G_neu;
+            public List<Edge> edges;
+            public float? DISTANCE;
+            public Edge negativeCycleEdge;
+        }
+
+        public struct DSPResult
         {
             public Graph G_neu;
             public SimplePriorityQueue<int> VQueue;
-            public List<Edge> edges;
             public float? DISTANCE;
-
-            public Edge negativeCycleEdge;
         }
         #endregion
 
-        public static SPValues InitSP(Graph g, int NODE_S, Algorithms.SP choice)
+        public static DSPResult InitDSP(Graph g, int NODE_S)
         {
-            SPValues sPValues = new SPValues();
-            sPValues.G_neu = new DirectedGraph();
-
-            if (Algorithms.SP.DIJKSTRA == choice)
-            {
-                sPValues.VQueue = new SimplePriorityQueue<int>();
-            }
-            else
-            {
-                sPValues.edges = new List<Edge>(g.NUMBER_OF_EDGES);
-            }
+            DSPResult result = new DSPResult();
+            result.G_neu = new DirectedGraph();
+            result.VQueue = new SimplePriorityQueue<int>();
 
             foreach (Node node in g.nodes.Values)
             {
                 node.DISTANCE = float.PositiveInfinity;
                 node.unmark();
-                if (Algorithms.SP.DIJKSTRA == choice)
-                {
-                    sPValues.VQueue.Enqueue(node.ID, node.DISTANCE);
-                }
-                else
-                {
-                    sPValues.edges.AddRange(node.edges);
-                }
+                result.VQueue.Enqueue(node.ID, node.DISTANCE);
             }
             g.nodes[NODE_S].DISTANCE = 0.0f;
+            result.VQueue.UpdatePriority(NODE_S, g.nodes[NODE_S].DISTANCE);
 
-            if (Algorithms.SP.DIJKSTRA == choice)
+            return result;
+        }
+
+        public static BFSPResult InitBFSP(Graph g, int NODE_S)
+        {
+            BFSPResult result = new BFSPResult();
+            result.G_neu = new DirectedGraph();
+            result.edges = new List<Edge>(g.NUMBER_OF_EDGES());
+            foreach (Node node in g.nodes.Values)
             {
-                sPValues.VQueue.UpdatePriority(NODE_S, g.nodes[NODE_S].DISTANCE);
+                node.DISTANCE = float.PositiveInfinity;
+                node.unmark();
+                result.edges.AddRange(node.edges);
+
             }
-            return sPValues;
+            g.nodes[NODE_S].DISTANCE = 0.0f;
+            return result;
         }
 
         public static List<Node> GetUnmarkedNeighbours(Graph g, int N)
