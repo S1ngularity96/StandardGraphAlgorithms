@@ -35,6 +35,14 @@ namespace MA.Classes
             this.FORWARD = forward;
         }
 
+        public Edge(int V_FROM, int V_TO, float flow, float capacity)
+        {
+            this.V_FROM = V_FROM;
+            this.V_TO = V_TO;
+            this.CAPACITY = capacity;
+            this.FLOW = flow;
+        }
+
         public float GetCapacity()
         {
             return this.CAPACITY;
@@ -55,11 +63,13 @@ namespace MA.Classes
             this.CAPACITY = capacity;
         }
 
-        public bool isResidualBackward(){
+        public bool isResidualBackward()
+        {
             return !this.FORWARD;
         }
 
-        public bool isResidualForwad(){
+        public bool isResidualForwad()
+        {
             return this.FORWARD;
         }
 

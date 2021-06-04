@@ -13,14 +13,10 @@ namespace MA
         public static bool ENABLE_TIME_MEASUREMENTS = false;
         static void Main(string[] args)
         {
-
             System.Console.OutputEncoding = System.Text.Encoding.UTF8;
-            ShortestPathDemo(null);
-
-            //CommandLine.Parser.Default.ParseArguments<CLIOptions>(args).
-            //WithParsed(RunOptions).
-            //WithNotParsed(HandleParseError);
-
+            CommandLine.Parser.Default.ParseArguments<CLIOptions>(args).
+            WithParsed(RunOptions).
+            WithNotParsed(HandleParseError);
         }
         static void RunOptions(CLIOptions options)
         {

@@ -626,13 +626,12 @@ namespace MA
         {
             int TRIES = 1000000;
             int CURRENT_TRIE = 0;
-            int printed = 0;
             g.UnmarkAllNodes();
             while (TRIES != CURRENT_TRIE)
             {
                 Graph G_residual = FlowAlgorithms.CreateResidualGraph(g);
                 FlowAlgorithms.AugmentedPath augpath = FlowAlgorithms.BFSPath(G_residual, S, T);
-                
+
                 if (augpath.pathOfEdges == null)
                 {
                     float flow = 0.0f;
@@ -640,26 +639,20 @@ namespace MA
                     {
                         foreach (Edge edge in node.edges)
                         {
-                            if (edge.V_TO == T)
+                            if (edge.V_FROM == S)
                             {
-                                flow += edge.GetCapacity();
+                                flow += edge.GetFlow();
                             }
-                            if (edge.V_FROM == T)
+                            if (edge.V_TO == S)
                             {
-                                flow -= edge.GetCapacity();
+                                flow -= edge.GetFlow();
                             }
                         }
                     }
                     return flow;
                 }
                 FlowAlgorithms.UpdateFlows(augpath, g);
-
-                for(int i= 0; i< printed;i++){
-                    System.Console.Write("\r");
-                }
-                printed = g.PrintEdges();
                 CURRENT_TRIE++;
-
             }
             throw new GraphException("EdmondKarp Algorithm failed");
         }

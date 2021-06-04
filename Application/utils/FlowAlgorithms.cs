@@ -13,6 +13,12 @@ namespace MA
             public List<Edge> pathOfEdges;
         }
 
+        public struct Parent
+        {
+            public Edge edge;
+            public int node;
+        }
+
         public static Graph CreateResidualGraph(Graph g)
         {
             Graph G_neu = new DirectedGraph();
@@ -23,12 +29,12 @@ namespace MA
                 {
                     Edge forwardEdge = new Edge(edge.V_FROM, edge.V_TO, edge.GetCapacity() - edge.GetFlow(), forward: true);
                     Edge backwardEdge = new Edge(edge.V_TO, edge.V_FROM, edge.GetFlow(), forward: false);
-                    if (forwardEdge.GetCapacity() > 0)
+                    if (forwardEdge.GetCapacity() != 0)
                     {
                         G_neu.nodes[forwardEdge.V_FROM].AddEdge(forwardEdge);
                     }
 
-                    if (backwardEdge.GetCapacity() > 0)
+                    if (backwardEdge.GetCapacity() != 0)
                     {
                         G_neu.nodes[backwardEdge.V_FROM].AddEdge(backwardEdge);
                     }
@@ -41,25 +47,30 @@ namespace MA
         {
 
             float yMin = p.minEdge.GetCapacity();
-            foreach (Edge edge in p.pathOfEdges)
+            List<Edge> pathOfEdges = new List<Edge>(p.pathOfEdges);
+
+            foreach (Edge edge in pathOfEdges)
             {
                 if (edge.isResidualBackward())
                 {
                     foreach (Edge orig_edge in g.nodes[edge.V_TO].edges)
                     {
-                        if (edge.V_TO == orig_edge.V_FROM && edge.V_FROM == orig_edge.V_TO)
+                        if (orig_edge.V_FROM == edge.V_TO && orig_edge.V_TO == edge.V_FROM)
                         {
-                            orig_edge.SetFlow(orig_edge.GetCapacity() - yMin);
+
+                            orig_edge.SetFlow(orig_edge.GetFlow() - yMin);
                         }
                     }
+
+
                 }
-                else
+                else if (edge.isResidualForwad())
                 {
                     foreach (Edge orig_edge in g.nodes[edge.V_FROM].edges)
                     {
-                        if (edge.V_FROM == orig_edge.V_FROM && edge.V_TO == edge.V_TO)
+                        if (orig_edge.V_FROM == edge.V_FROM && orig_edge.V_TO == edge.V_TO)
                         {
-                            orig_edge.SetFlow(orig_edge.GetCapacity() + yMin);
+                            orig_edge.SetFlow(orig_edge.GetFlow() + yMin);
                         }
                     }
                 }
@@ -68,7 +79,26 @@ namespace MA
         }
 
 
+        public static List<Edge> GetPath(Dictionary<int, Parent> paths, int S, int T)
+        {
+            List<Edge> path = new List<Edge>();
+            Parent p = paths[T];
 
+
+            while (p.node != S)
+            {
+                path.Insert(0, p.edge);
+                p = paths[p.node];
+            }
+
+            if (p.node == S)
+            {
+                path.Insert(0, p.edge);
+                return path;
+            }
+
+            throw new GraphException("Could not get shortest path in Edmond Karp");
+        }
 
         public static AugmentedPath BFSPath(Graph g, int S, int T)
         {
@@ -81,7 +111,7 @@ namespace MA
             g.UnmarkAllNodes();
             AugmentedPath augpath = new AugmentedPath();
             //Dictionary<ParentNodeID, PathEdges>
-            Dictionary<int, List<Edge>> paths = new Dictionary<int, List<Edge>>();
+            Dictionary<int, Parent> parents = new Dictionary<int, Parent>();
             Queue<Node> queue = new Queue<Node>();
             queue.Enqueue(g.nodes[S]);
             while (queue.Count != 0)
@@ -93,31 +123,22 @@ namespace MA
                     if (!g.nodes[edge.V_TO].isMarked())
                     {
                         g.nodes[edge.V_TO].mark();
-                        if (paths.ContainsKey(node.ID))
-                        {
-                            paths[node.ID].Add(edge);
-                        }
-                        else
-                        {
-                            paths.Add(node.ID, new List<Edge>() { edge });
-                        }
-
+                        parents[edge.V_TO] = new Parent { edge = edge, node = edge.V_FROM };
                         if (g.nodes[edge.V_TO].ID == T)
                         {
                             //finish search
-                            augpath.pathOfEdges = paths[node.ID];
-                            augpath.minEdge = paths[node.ID][0];
-                            foreach (Edge e in paths[node.ID])
+                            augpath.pathOfEdges = GetPath(parents, S, T);
+                            augpath.minEdge = new Edge(0, 0, float.PositiveInfinity);
+                            foreach (Parent parent in parents.Values)
                             {
-                                if (e.GetCapacity() < augpath.minEdge.GetCapacity())
+                                if (parent.edge.GetCapacity() < augpath.minEdge.GetCapacity())
                                 {
-                                    augpath.minEdge = e;
-                                    
+                                    augpath.minEdge = parent.edge;
+
                                 }
                             }
                             return augpath;
                         }
-
                         queue.Enqueue(g.nodes[edge.V_TO]);
                     }
                 }
