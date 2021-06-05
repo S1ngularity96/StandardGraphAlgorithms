@@ -11,6 +11,14 @@ namespace MA.Helper
             public int NODE_S;
             public int? NODE_T;
         }
+
+        public struct EKDemoObject {
+            public string name;
+            public string filename;
+            public int NODE_S;
+            public int NODE_T;
+
+        }
     }
 
 }

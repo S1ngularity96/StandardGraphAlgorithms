@@ -81,5 +81,9 @@ namespace MA.Classes
             return $"Node: {this.ID}";
         }
 
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
     }
 }

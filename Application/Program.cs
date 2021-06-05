@@ -14,14 +14,15 @@ namespace MA
         static void Main(string[] args)
         {
             System.Console.OutputEncoding = System.Text.Encoding.UTF8;
-            CommandLine.Parser.Default.ParseArguments<CLIOptions>(args).
-            WithParsed(RunOptions).
-            WithNotParsed(HandleParseError);
+            MaxFlowDemo();
+            // CommandLine.Parser.Default.ParseArguments<CLIOptions>(args).
+            // WithParsed(RunOptions).
+            // WithNotParsed(HandleParseError);
         }
         static void RunOptions(CLIOptions options)
         {
             ENABLE_TIME_MEASUREMENTS = options.stopwatch;
-            MaxFlow(options);
+            
 
         }
 
@@ -128,19 +129,40 @@ namespace MA
             }
         }
 
-        static void MaxFlow(CLIOptions options)
-        {
-            Graph g = new DirectedGraph();
-            System.Console.WriteLine(options.File);
-            g.ReadFromFile(options.File, options.capacity);
-            try
-            {
-                float maxFlow = Algorithms.EdmondKarp(g, 0, 7);
-                System.Console.WriteLine($"Der maximale fluß beträgt {maxFlow}");
-            }
-            catch (GraphException ex)
-            {
-                System.Console.WriteLine(ex.Message);
+        static void MaxFlowDemo(){
+            
+            string ROOT = "/home/andrei/Dokumente/Programmierprojekte/C#/Mathematische_Algorithmen/data";
+            Helper.Structs.EKDemoObject[] cases = {
+                new Structs.EKDemoObject{
+                    name = "Fluss",
+                    filename = ROOT+"/flow/Fluss.txt",
+                    NODE_S = 0,
+                    NODE_T = 7
+                },
+                new Structs.EKDemoObject{
+                    name = "Fluss2",
+                    filename = ROOT+"/flow/Fluss2.txt",
+                    NODE_S = 0,
+                    NODE_T = 7
+                },
+                new Structs.EKDemoObject{
+                    name = "G_1_2",
+                    filename = ROOT+"/capacity/G_1_2.txt",
+                    NODE_S = 0,
+                    NODE_T = 7
+                }
+            };
+
+            foreach(Helper.Structs.EKDemoObject ekcase in cases){
+                Graph g = new DirectedGraph();
+                g.ReadFromFile(ekcase.filename, true);
+                try{
+                    float maxFlow = Algorithms.EdmondKarp(g, ekcase.NODE_S, ekcase.NODE_T);
+                    System.Console.WriteLine($"Graph {ekcase.name}:\t Der maximale Fluß von {ekcase.NODE_S} nach {ekcase.NODE_T} beträgt {maxFlow}.");
+
+                }catch(GraphException ex){
+                    System.Console.WriteLine(ex.Message);
+                }
             }
         }
 
