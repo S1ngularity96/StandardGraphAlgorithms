@@ -6,13 +6,15 @@ namespace MA.Helper
         public struct SPDemoObject
         {
             public string name;
+            public string filename;
             public Algorithms.SP algorithm;
             public Graph.Direction direction;
             public int NODE_S;
             public int? NODE_T;
         }
 
-        public struct EKDemoObject {
+        public struct EKDemoObject
+        {
             public string name;
             public string filename;
             public int NODE_S;

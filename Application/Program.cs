@@ -14,16 +14,27 @@ namespace MA
         static void Main(string[] args)
         {
             System.Console.OutputEncoding = System.Text.Encoding.UTF8;
-            MaxFlowDemo();
-            // CommandLine.Parser.Default.ParseArguments<CLIOptions>(args).
-            // WithParsed(RunOptions).
-            // WithNotParsed(HandleParseError);
+
+            CommandLine.Parser.Default.ParseArguments<CLIOptions>(args).
+            WithParsed(RunOptions).
+            WithNotParsed(HandleParseError);
         }
         static void RunOptions(CLIOptions options)
         {
-            ENABLE_TIME_MEASUREMENTS = options.stopwatch;
-            
+            if (options.spdemo)
+            {
+                ShortestPathDemo();
+            }
 
+            if (options.maxflowdemo)
+            {
+                MaxFlowDemo();
+            }
+
+            if (options.File != null)
+            {
+                //... Choose something 
+            }
         }
 
         static void BruteForce(CLIOptions options, bool BB = false)
@@ -59,39 +70,44 @@ namespace MA
             });
         }
 
-        static void ShortestPathDemo(CLIOptions options)
+        static void ShortestPathDemo()
         {
-            string ROOT = "C:\\Users\\Livem\\Documents\\Programmierprojekte\\CSharp\\GraphAlgorithms\\data";
+            string ROOT = System.IO.Path.Join(Config.SLN_DIR, "data");
             Helper.Structs.SPDemoObject[] cases = {
                 new Structs.SPDemoObject {
-                    name = "sp\\Wege1.txt",
+                    filename = System.IO.Path.Join(ROOT,"sp","Wege1.txt"),
+                    name = "Wege1",
                     algorithm = Algorithms.SP.DIJKSTRA,
                     direction = Graph.Direction.directed,
                     NODE_S = 2,
                     NODE_T = 0
             },
                 new Structs.SPDemoObject{
-                    name = "sp\\Wege2.txt",
+                    filename = System.IO.Path.Join(ROOT,"sp","Wege2.txt"),
+                    name = "Wege2",
                     algorithm = Algorithms.SP.BELLMAN,
                     direction = Graph.Direction.directed,
                     NODE_S = 2,
                     NODE_T = 0
                 },
                 new Structs.SPDemoObject{
-                    name = "sp\\Wege3.txt",
+                    filename = System.IO.Path.Join(ROOT, "sp","Wege3.txt"),
+                    name = "Wege3",
                     algorithm = Algorithms.SP.BELLMAN,
                     direction = Graph.Direction.directed,
                     NODE_S = 0,
                 },
                 new Structs.SPDemoObject {
-                    name = "capacity\\G_1_2.txt",
+                    filename = System.IO.Path.Join(ROOT,"capacity","G_1_2.txt"),
+                    name = "G_1_2",
                     algorithm = Algorithms.SP.BELLMAN,
                     direction = Graph.Direction.directed,
                     NODE_S = 0,
                     NODE_T = 1
                 },
                 new Structs.SPDemoObject {
-                    name = "capacity\\G_1_2.txt",
+                    filename = System.IO.Path.Join(ROOT, "capacity","G_1_2.txt"),
+                    name = "G_1_2",
                     algorithm = Algorithms.SP.BELLMAN,
                     direction = Graph.Direction.undirected,
                     NODE_S = 0,
@@ -105,7 +121,7 @@ namespace MA
                 System.Console.ForegroundColor = System.ConsoleColor.Gray;
                 if (c.direction == Graph.Direction.directed) { g = new DirectedGraph(); }
                 else { g = new UndirectedGraph(); }
-                g.ReadFromFile($"{ROOT}\\{c.name}", true);
+                g.ReadFromFile($"{c.filename}", true);
                 if (c.algorithm == Algorithms.SP.DIJKSTRA)
                 {
                     GraphUtils.DSPResult result = Algorithms.DSP(g, c.NODE_S, c.NODE_T);
@@ -129,38 +145,42 @@ namespace MA
             }
         }
 
-        static void MaxFlowDemo(){
-            
-            string ROOT = "/home/andrei/Dokumente/Programmierprojekte/C#/Mathematische_Algorithmen/data";
+        static void MaxFlowDemo()
+        {
+
+            string ROOT = System.IO.Path.Join(Config.SLN_DIR, "data");
             Helper.Structs.EKDemoObject[] cases = {
                 new Structs.EKDemoObject{
                     name = "Fluss",
-                    filename = ROOT+"/flow/Fluss.txt",
+                    filename = System.IO.Path.Join(ROOT,"flow","Fluss.txt"),
                     NODE_S = 0,
                     NODE_T = 7
                 },
                 new Structs.EKDemoObject{
                     name = "Fluss2",
-                    filename = ROOT+"/flow/Fluss2.txt",
+                    filename = System.IO.Path.Join(ROOT,"flow","Fluss2.txt"),
                     NODE_S = 0,
                     NODE_T = 7
                 },
                 new Structs.EKDemoObject{
                     name = "G_1_2",
-                    filename = ROOT+"/capacity/G_1_2.txt",
+                    filename = System.IO.Path.Join(ROOT,"capacity","G_1_2.txt"),
                     NODE_S = 0,
                     NODE_T = 7
                 }
             };
 
-            foreach(Helper.Structs.EKDemoObject ekcase in cases){
+            foreach (Helper.Structs.EKDemoObject ekcase in cases)
+            {
                 Graph g = new DirectedGraph();
                 g.ReadFromFile(ekcase.filename, true);
-                try{
+                try
+                {
                     float maxFlow = Algorithms.EdmondKarp(g, ekcase.NODE_S, ekcase.NODE_T);
                     System.Console.WriteLine($"Graph {ekcase.name}:\t Der maximale Fluß von {ekcase.NODE_S} nach {ekcase.NODE_T} beträgt {maxFlow}.");
-
-                }catch(GraphException ex){
+                }
+                catch (GraphException ex)
+                {
                     System.Console.WriteLine(ex.Message);
                 }
             }
