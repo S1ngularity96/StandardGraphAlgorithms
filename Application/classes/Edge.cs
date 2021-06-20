@@ -9,6 +9,7 @@ namespace MA.Classes
         private bool FORWARD { get; set; }
         private float CAPACITY = 0.0f;
         private float FLOW = 0.0f;
+        private float COST = 0.0f;
 
         public Edge(int V_FROM, int V_TO)
         {
@@ -43,9 +44,22 @@ namespace MA.Classes
             this.FLOW = flow;
         }
 
+        public Edge(int V_FROM, int V_TO, float cost, float capacity, float flow){
+            this.V_FROM = V_FROM;
+            this.V_TO = V_TO;
+            this.COST = cost;
+            this.CAPACITY = capacity;
+            this.FLOW = 0.0f;
+        }
+
+        #region Getter & Setter
         public float GetCapacity()
         {
             return this.CAPACITY;
+        }
+        public void SetCapacity(float capacity)
+        {
+            this.CAPACITY = capacity;
         }
 
         public float GetFlow()
@@ -58,10 +72,15 @@ namespace MA.Classes
             this.FLOW = flow;
         }
 
-        public void SetCapacity(float capacity)
-        {
-            this.CAPACITY = capacity;
+
+        public float GetCosts(){
+            return this.COST;
         }
+        public void SetCosts(float cost){
+            this.COST = cost;
+        }
+
+        #endregion
 
         public bool isResidualBackward()
         {

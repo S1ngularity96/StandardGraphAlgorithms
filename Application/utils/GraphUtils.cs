@@ -1,5 +1,6 @@
 using MA.Interfaces;
 using MA.Classes;
+using MA.Exceptions;
 using System.Collections.Generic;
 using Priority_Queue;
 namespace MA
@@ -55,6 +56,28 @@ namespace MA
             }
             g.nodes[NODE_S].DISTANCE = 0.0f;
             return result;
+        }
+
+        public static List<int> GetNodeIdsOfType(Graph g, Node.NodeType type){
+            List<int> ids = new List<int>();
+            foreach(Node node in g.nodes.Values){
+                if(node.type == type){
+                    ids.Add(node.ID);
+                }
+            }
+            return ids;
+        }
+
+        public static Edge GetEdgeFromTo(Graph g, int V_FROM, int V_TO){
+            if(g.nodes.ContainsKey(V_FROM)){
+                foreach(Edge edge in g.nodes[V_FROM].edges){
+                    if(edge.V_TO == V_TO){
+                        return edge;
+                    }
+                }
+                throw new GraphException($"Could not find V_TO ({V_FROM} -> {V_TO})");
+            }
+            throw new GraphException($"Could not find V_FROM ({V_FROM} -> {V_TO})");
         }
 
         public static List<Node> GetUnmarkedNeighbours(Graph g, int N)
