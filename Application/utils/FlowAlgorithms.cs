@@ -134,7 +134,6 @@ namespace MA
                                 if (parent.edge.GetCapacity() < augpath.minEdge.GetCapacity())
                                 {
                                     augpath.minEdge = parent.edge;
-
                                 }
                             }
                             return augpath;
