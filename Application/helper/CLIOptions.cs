@@ -19,5 +19,8 @@ namespace MA.Helper
         public bool spdemo { get; set; }
         [Option("flowdemo", Required = false, Default = false, HelpText = "Runs max flow demo with edmond-karp Algorithm")]
         public bool maxflowdemo { get; set; }
+
+        [Option("mincost", Required = false, Default = false, HelpText = "Runs min-cost calculation demo")]
+        public bool mincostdemo { get; set; }
     }
 }

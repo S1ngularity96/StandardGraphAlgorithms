@@ -89,14 +89,36 @@ namespace MA.Interfaces
         }
         public abstract void AddEdge(int n1, int n2, float capacity);
 
-        public string PrintEdges()
+        public string NodesToString(){
+            string text = "";
+            foreach(Node node in nodes.Values){
+                text += $"ID: {node.ID}\t\t Edges: {node.edges.Count} \t\t Marked: {node.isMarked()} \t\t Type: {node.type}\n";
+            }
+            return text;
+        }
+
+        public string EdgesToString()
         {
             string text = "";
             foreach (Node node in nodes.Values)
             {
                 foreach (Edge edge in node.edges)
                 {
-                    text += $"V_FROM: {edge.V_FROM}\t\t V_TO:{edge.V_TO}\t\t CAP:{edge.GetCapacity()}\t\t FLOW:\t\t {edge.GetFlow()}\t\tFORWARD: {edge.isResidualForwad()}\n";
+                    text += $"V_FROM: {edge.V_FROM}\t\t V_TO:{edge.V_TO}\t\t CAP:{edge.GetCapacity()}\t\t FLOW: {edge.GetFlow()}\t\t Cost: {edge.GetCosts()} \t\tFORWARD: {edge.isResidualForwad()}\n";
+                }
+            }
+            return text;
+        }
+
+        public string GraphToString()
+        {
+            string text = "";
+            foreach (Node node in nodes.Values)
+            {
+                text += $"\nID: {node.ID}\t\t Edges: {node.edges.Count} \tMarked: {node.isMarked()} \t\t Type: {node.type}\n";
+                foreach (Edge edge in node.edges)
+                {
+                    text += $"V_TO:{edge.V_TO}\t\t CAP:{edge.GetCapacity()}\t\t FLOW: {edge.GetFlow()}\t\t Cost: {edge.GetCosts()} \t\tFORWARD: {edge.isResidualForwad()}\n";
                 }
             }
             return text;

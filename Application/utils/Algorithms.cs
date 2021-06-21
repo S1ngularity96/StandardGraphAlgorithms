@@ -656,5 +656,23 @@ namespace MA
             }
             throw new GraphException("EdmondKarp Algorithm failed");
         }
+
+        public static float CycleCanceling(DirectedGraph g)
+        {
+            List<int> sources = GraphUtils.GetNodeIdsOfType(g, Node.NodeType.SOURCE);
+            List<int> sinks = GraphUtils.GetNodeIdsOfType(g, Node.NodeType.SINK);
+            try
+            {
+                DirectedGraph g_neu = MinimalCostAlgorithms.RandomB_Flow(g, sources, sinks);
+                DirectedGraph g_residual = MinimalCostAlgorithms.CreateResidualGraph(g_neu);
+                List<Edge> edges = MinimalCostAlgorithms.FindNegativeCycle(g_residual, sources, sinks);
+                MinimalCostAlgorithms.PrintNegativeCycleEdges(edges);
+            }catch(GraphException ex)
+            {
+                System.Console.WriteLine(ex.Message);
+            }
+            return 0.0f;
+        }
+        
     }
 }

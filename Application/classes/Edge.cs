@@ -36,6 +36,15 @@ namespace MA.Classes
             this.FORWARD = forward;
         }
 
+        public Edge(int V_FROM, int V_TO, float capacity, float costs, bool forward)
+        {
+            this.V_FROM = V_FROM;
+            this.V_TO = V_TO;
+            this.CAPACITY = capacity;
+            this.COST = costs;
+            this.FORWARD = forward;
+        }
+
         public Edge(int V_FROM, int V_TO, float flow, float capacity)
         {
             this.V_FROM = V_FROM;
@@ -44,13 +53,15 @@ namespace MA.Classes
             this.FLOW = flow;
         }
 
-        public Edge(int V_FROM, int V_TO, float cost, float capacity, float flow){
+        public Edge(int V_FROM, int V_TO, float flow, float capacity, float cost){
             this.V_FROM = V_FROM;
             this.V_TO = V_TO;
             this.COST = cost;
             this.CAPACITY = capacity;
-            this.FLOW = 0.0f;
+            this.FLOW = flow;
         }
+
+        
 
         #region Getter & Setter
         public float GetCapacity()
@@ -92,8 +103,11 @@ namespace MA.Classes
             return this.FORWARD;
         }
 
+
         public override bool Equals(object obj)
-        {
+        {   
+            bool directions = false;
+            bool attributes = false;
             if (obj == null) { throw new GraphException("Can not compare edge with non-existing edge"); }
             if (obj.GetType().Equals(this.GetType()))
             {
@@ -101,8 +115,14 @@ namespace MA.Classes
                 if (((this.V_TO == other.V_TO && this.V_FROM == other.V_FROM) ||
                 (this.V_TO == other.V_FROM && this.V_FROM == other.V_TO)) && this.CAPACITY == other.CAPACITY)
                 {
-                    return true;
+                    directions =  true;
                 }
+
+                if(this.FLOW == other.FLOW && this.COST == other.COST && this.CAPACITY == other.CAPACITY){
+                    attributes = true;
+                }
+
+                return directions && attributes;
 
             }
             return false;

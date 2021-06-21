@@ -93,6 +93,8 @@ namespace MA
             return neighbours;
         }
 
+        
+
         public static void PrintTourWithCosts(List<Node> tour, float cost)
         {
             List<Node> copy = new List<Node>(tour);

@@ -8,6 +8,10 @@ namespace MA.Classes
 {
     public class DirectedGraph : Graph
     {
+        
+        public DirectedGraph(){
+             this.nodes = new NodeSet();
+        }
 
         public override void AddEdge(int N1, int N2, float capacity)
         {
@@ -18,6 +22,16 @@ namespace MA.Classes
             Node n1 = nodes.GetOrAdd(N1);
             n1.AddEdge(N1, N2, capacity);
 
+        }
+
+        public Node AddNode()
+        {
+            int num = NUMBER_OF_NODES();
+            while (this.nodes.ContainsKey(num)){ num++;  }
+            Node node = new Node(num);
+            this.nodes.Add(num, node);
+
+            return node;
         }
 
         public override int NUMBER_OF_EDGES()
@@ -61,6 +75,7 @@ namespace MA.Classes
                 int CURRENT_NODE = 0;
                 while ((S_DATA = sr.ReadLine()) != null)
                 {
+                    
                     float balance = float.Parse(S_DATA, CultureInfo.InvariantCulture.NumberFormat);
                     this.nodes[CURRENT_NODE].SetBalance(balance);
                     CURRENT_NODE++;
@@ -76,9 +91,9 @@ namespace MA.Classes
                         node.AddEdge(new Edge(
                             int.Parse(ELEMENT[V_FROM]),
                             int.Parse(ELEMENT[V_TO]),
-                            float.Parse(ELEMENT[COSTS], CultureInfo.InvariantCulture.NumberFormat),
+                            0.0f,
                             float.Parse(ELEMENT[CAP_INDEX], CultureInfo.InvariantCulture.NumberFormat),
-                            0.0f));
+                            float.Parse(ELEMENT[COSTS], CultureInfo.InvariantCulture.NumberFormat)));
                     }
                 }
             }
@@ -87,6 +102,7 @@ namespace MA.Classes
         public override string ToString()
         {
             return $"Directed Graph\n|V| = {nodes.Count}\n|E| = {NUMBER_OF_EDGES()}";
+            
         }
 
 

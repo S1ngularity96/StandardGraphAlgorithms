@@ -1,7 +1,6 @@
 using Xunit;
 using Xunit.Abstractions;
 using MA.Classes;
-using System;
 using System.Collections.Generic;
 namespace MA.Testing
 {
@@ -82,7 +81,7 @@ namespace MA.Testing
                         new EdgeT(3, 4, 1.0f, 2.0f)
                     }
                 }
-    };
+            };
 
             foreach(GraphT expG in graphs){
                 List<NodeT> expectedNodes = expG.expectedNodes;
@@ -105,5 +104,7 @@ namespace MA.Testing
                 }
             }
         }
+
+       
     }
 }

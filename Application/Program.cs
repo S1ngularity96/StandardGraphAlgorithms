@@ -31,6 +31,11 @@ namespace MA
                 MaxFlowDemo();
             }
 
+            if (options.mincostdemo)
+            {
+                MinCostDemo();
+            }
+
             if (options.File != null)
             {
                 //... Choose something 
@@ -184,6 +189,13 @@ namespace MA
                     System.Console.WriteLine(ex.Message);
                 }
             }
+        }
+
+        static void MinCostDemo()
+        {
+            DirectedGraph g = new DirectedGraph();
+            g.ReadFromBalancedGraph(System.IO.Path.Join(Config.SLN_DIR, "data", "costminimal", "Kostenminimal1.txt"), false);
+            Algorithms.CycleCanceling(g);
         }
 
         static void HandleParseError(IEnumerable<Error> errors)
