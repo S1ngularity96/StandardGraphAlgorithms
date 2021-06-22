@@ -566,7 +566,7 @@ namespace MA
         }
 
 
-        public static GraphUtils.BFSPResult BFSP(Graph g, int NODE_S, int? NODE_T)
+        public static GraphUtils.BFSPResult BFSP(Graph g, int NODE_S, int? NODE_T, Functions.CostOfEdge c)
         {
             //Step 1
             GraphUtils.BFSPResult result = GraphUtils.InitBFSP(g, NODE_S);
@@ -581,7 +581,7 @@ namespace MA
                 {
                     if (g.nodes[edge.V_FROM].DISTANCE != float.PositiveInfinity)
                     {
-                        float calculatedDistance = g.nodes[edge.V_FROM].DISTANCE + edge.GetCapacity();
+                        float calculatedDistance = g.nodes[edge.V_FROM].DISTANCE + c(edge);
                         if (calculatedDistance < g.nodes[edge.V_TO].DISTANCE)
                         {
                             updated = true;
@@ -596,7 +596,7 @@ namespace MA
             foreach (Edge edge in edges)
             {
 
-                float calculatedDistance = g.nodes[edge.V_FROM].DISTANCE + edge.GetCapacity();
+                float calculatedDistance = g.nodes[edge.V_FROM].DISTANCE + c(edge);
                 if (calculatedDistance < g.nodes[edge.V_TO].DISTANCE)
                 {
                     result.negativeCycleEdge = edge;
@@ -610,7 +610,9 @@ namespace MA
                     if (!result.G_neu.nodes.ContainsKey(g.nodes[edge.V_TO].Predecessor.V_FROM))
                         result.G_neu.nodes.Add(g.nodes[edge.V_TO].Predecessor.V_FROM, new Node(g.nodes[edge.V_TO].Predecessor.V_FROM));
 
-                    result.G_neu.AddEdge(g.nodes[edge.V_TO].Predecessor.V_FROM, edge.V_TO, g.nodes[edge.V_TO].Predecessor.GetCapacity());
+                    int V_FROM = g.nodes[edge.V_TO].Predecessor.V_FROM;
+                    int V_TO = edge.V_TO;
+                    result.G_neu.nodes[V_FROM].AddEdge(new Edge(V_FROM, V_TO, edge.GetFlow(),edge.GetCapacity(),edge.GetCosts()));
                 }
 
             }
@@ -665,8 +667,8 @@ namespace MA
             {
                 DirectedGraph g_neu = MinimalCostAlgorithms.RandomB_Flow(g, sources, sinks);
                 DirectedGraph g_residual = MinimalCostAlgorithms.CreateResidualGraph(g_neu);
-                List<Edge> edges = MinimalCostAlgorithms.FindNegativeCycle(g_residual, sources, sinks);
-                MinimalCostAlgorithms.PrintNegativeCycleEdges(edges);
+                GraphUtils.BFSPResult result = MinimalCostAlgorithms.FindNegativeCycle(g_residual, sources, sinks);
+                MinimalCostAlgorithms.PrintNegativeCycleEdges(result.edges);
             }catch(GraphException ex)
             {
                 System.Console.WriteLine(ex.Message);

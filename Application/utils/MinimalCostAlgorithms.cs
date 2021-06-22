@@ -15,14 +15,15 @@ namespace MA
             public int[] supernodeIDs;
         }
 
-        public static void PrintNegativeCycleEdges(List<Edge> edges)
-        {
+        public static string PrintNegativeCycleEdges(List<Edge> edges)
+        {   string text  = "";
             if(edges == null)
-                return;
+                return "";
             foreach(Edge edge in edges)
             {
-                System.Console.WriteLine($"From: {edge.V_FROM}, To: {edge.V_TO}, Cost: {edge.GetCosts()} Cap: {edge.GetCapacity()}");
+                text += $"From: {edge.V_FROM}, To: {edge.V_TO}, Cost: {edge.GetCosts()} Cap: {edge.GetCapacity()}\n";
             }
+            return text;
         }
 
         public static DirectedGraph CreateResidualGraph(DirectedGraph g)
@@ -64,18 +65,20 @@ namespace MA
             return costs;
         }
 
-        public static List<Edge> FindNegativeCycle(DirectedGraph g, List<int> sources, List<int> sinks)
-        {
+        public static GraphUtils.BFSPResult FindNegativeCycle(DirectedGraph g, List<int> sources, List<int> sinks)
+        {   
+            GraphUtils.BFSPResult result = new GraphUtils.BFSPResult();
             foreach(int source in sources)
             {
                 foreach(int sink in sinks)
                 {
-                    var result = Algorithms.BFSP(g, source, sink);
-                    if (result.negativeCycleEdge != null)
-                        return result.edges;
+                    result = Algorithms.BFSP(g, source, sink, (Edge e) => {return e.GetCosts() * e.GetCapacity();});
+                    if (result.negativeCycleEdge != null){
+                        return result;
+                    }
                 }
             }
-            return null;
+            return result;
         }
 
 
@@ -111,6 +114,8 @@ namespace MA
 
             graph.nodes.Remove(ssource);
             graph.nodes.Remove(ssink);
+            
+
 
             foreach(int sink in sinks)
             {
@@ -126,8 +131,8 @@ namespace MA
             supergraph.g.UnmarkAllNodes();
             Algorithms.EdmondKarp(g, supergraph.supernodeIDs[0], supergraph.supernodeIDs[1]);
             //Remove Super-Source/Sink
-            //var result = RemoveSuperNodes(supergraph, sinks);
-            return supergraph.g;
+            var result = RemoveSuperNodes(supergraph, sinks);
+            return result;
         }
     }
 }

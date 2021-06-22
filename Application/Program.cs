@@ -135,7 +135,7 @@ namespace MA
 
                 if (c.algorithm == Algorithms.SP.BELLMAN)
                 {
-                    GraphUtils.BFSPResult result = Algorithms.BFSP(g, c.NODE_S, c.NODE_T);
+                    GraphUtils.BFSPResult result = Algorithms.BFSP(g, c.NODE_S, c.NODE_T, (Edge edge) => { return edge.GetCapacity();} );
                     if (result.negativeCycleEdge != null)
                     {
                         System.Console.ForegroundColor = System.ConsoleColor.Red;

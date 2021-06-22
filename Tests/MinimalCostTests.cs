@@ -1,6 +1,6 @@
 using Xunit;
-using Xunit.Abstractions;
 using MA.Classes;
+using MA.Collections;
 using System.Collections.Generic;
 using System.IO;
 namespace MA.Testing
@@ -230,7 +230,36 @@ namespace MA.Testing
             Assert.Contains<int>(5, sinks);
 
             var b_flow = MinimalCostAlgorithms.RandomB_Flow(g, sources, sinks);
-            File.WriteAllText(Path.Join(filepath, "bflow.log"), b_flow.EdgesToString());
+            File.WriteAllText(Path.Join(filepath, "b_flow.log"), b_flow.EdgesToString());
+        }
+
+        [Fact]
+        public void FindNegativeCycle(){
+            var g = CreateGraphOne();
+            var resudial = ResudialGraph(g);
+
+            var sources = GraphUtils.GetNodeIdsOfType(g, Node.NodeType.SOURCE);
+            var sinks = GraphUtils.GetNodeIdsOfType(g, Node.NodeType.SINK);
+            
+            Assert.Contains<int>(0, sources);
+            Assert.Contains<int>(1, sources);
+            Assert.Contains<int>(4, sinks);
+            Assert.Contains<int>(5, sinks);
+
+            
+            var result = MinimalCostAlgorithms.FindNegativeCycle(resudial, sources, sinks);
+            Assert.NotNull(result);
+
+            File.WriteAllText(Path.Join(filepath, "edges.log"), MinimalCostAlgorithms.PrintNegativeCycleEdges(result.edges));
+            File.WriteAllText(Path.Join(filepath, "n_edge.log"),result.negativeCycleEdge.ToString());
+
+            var touren = Algorithms.BranchAndBound(resudial, result.negativeCycleEdge.V_FROM, 100);
+            string text = "";
+
+            foreach(Tour tour in touren){
+                text += tour.ToString();
+            }
+            File.WriteAllText(Path.Join(filepath, "touren.log"), text);
         }
     }
 }
