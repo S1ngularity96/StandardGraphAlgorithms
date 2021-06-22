@@ -95,15 +95,19 @@ namespace MA
                         }
                     }
                     if(S_T != -1){
+                        float y_min = float.PositiveInfinity;
                         List<Edge> cycle = new List<Edge>();
                         Node currentNode = g.nodes[S_T];
                         Edge predecessor = currentNode.Predecessor;
                         cycle.Add(predecessor);
+                        y_min = predecessor.GetCosts();
                         currentNode = g.nodes[predecessor.V_FROM];
                         while(currentNode.ID != S_T){
                             predecessor = currentNode.Predecessor;
                             cycle.Add(predecessor);
                             currentNode = g.nodes[predecessor.V_FROM];
+                            if(y_min < predecessor.GetCosts())
+                                y_min = predecessor.GetCosts();
                         }
                         result.edges = cycle;
                     }
