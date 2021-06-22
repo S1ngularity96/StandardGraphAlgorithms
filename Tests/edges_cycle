@@ -1,0 +1,4 @@
+From: 1, To: 3, Cost: 3 Cap: 1
+From: 2, To: 1, Cost: -5 Cap: 3
+From: 5, To: 2, Cost: -2 Cap: 5
+From: 3, To: 5, Cost: 2 Cap: 3

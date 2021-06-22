@@ -186,10 +186,12 @@ namespace MA.Testing
                 Assert.StrictEqual<bool>(re.forward, edge.isResidualForwad());
 
             }
+
         }
 
         [Fact]
-        public void TestSuperNodes(){
+        public void TestSuperNodes()
+        {
             var g = CreateGraphWithoutBFlow();
             var g_copy = CreateGraphWithoutBFlow();
             var sources = GraphUtils.GetNodeIdsOfType(g, Node.NodeType.SOURCE);
@@ -204,11 +206,13 @@ namespace MA.Testing
             var g_old = MinimalCostAlgorithms.RemoveSuperNodes(supergraph, sinks);
 
             int n_total = g.NUMBER_OF_NODES();
-            for(int node = 0; node < n_total; node++){
+            for (int node = 0; node < n_total; node++)
+            {
                 Assert.StrictEqual<int>(g_copy.nodes[node].ID, g.nodes[node].ID);
                 int e_total = g_copy.nodes[node].edges.Count;
                 Assert.StrictEqual<int>(e_total, g.nodes[node].edges.Count);
-                for (int edge = 0; edge < e_total; edge++){
+                for (int edge = 0; edge < e_total; edge++)
+                {
                     Edge e_copy = g_copy.nodes[node].edges[edge];
                     Edge e_new = g.nodes[node].edges[edge];
 
@@ -230,36 +234,28 @@ namespace MA.Testing
             Assert.Contains<int>(5, sinks);
 
             var b_flow = MinimalCostAlgorithms.RandomB_Flow(g, sources, sinks);
-            File.WriteAllText(Path.Join(filepath, "b_flow.log"), b_flow.EdgesToString());
+
         }
 
         [Fact]
-        public void FindNegativeCycle(){
+        public void FindNegativeCycle()
+        {
             var g = CreateGraphOne();
             var resudial = ResudialGraph(g);
 
+
+
             var sources = GraphUtils.GetNodeIdsOfType(g, Node.NodeType.SOURCE);
             var sinks = GraphUtils.GetNodeIdsOfType(g, Node.NodeType.SINK);
-            
+
             Assert.Contains<int>(0, sources);
             Assert.Contains<int>(1, sources);
             Assert.Contains<int>(4, sinks);
             Assert.Contains<int>(5, sinks);
 
-            
+
             var result = MinimalCostAlgorithms.FindNegativeCycle(resudial, sources, sinks);
-            Assert.NotNull(result);
-
-            File.WriteAllText(Path.Join(filepath, "edges.log"), MinimalCostAlgorithms.PrintNegativeCycleEdges(result.edges));
-            File.WriteAllText(Path.Join(filepath, "n_edge.log"),result.negativeCycleEdge.ToString());
-
-            var touren = Algorithms.BranchAndBound(resudial, result.negativeCycleEdge.V_FROM, 100);
-            string text = "";
-
-            foreach(Tour tour in touren){
-                text += tour.ToString();
-            }
-            File.WriteAllText(Path.Join(filepath, "touren.log"), text);
+            Assert.NotNull(result.negativeCycleEdge);
         }
     }
 }

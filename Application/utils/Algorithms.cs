@@ -600,21 +600,9 @@ namespace MA
                 if (calculatedDistance < g.nodes[edge.V_TO].DISTANCE)
                 {
                     result.negativeCycleEdge = edge;
-                    return result;
-                }
-                //Constructing Tree
-                if (g.nodes[edge.V_TO].Predecessor != null)
-                {
-                    if (!result.G_neu.nodes.ContainsKey(edge.V_TO))
-                        result.G_neu.nodes.Add(edge.V_TO, new Node(edge.V_TO));
-                    if (!result.G_neu.nodes.ContainsKey(g.nodes[edge.V_TO].Predecessor.V_FROM))
-                        result.G_neu.nodes.Add(g.nodes[edge.V_TO].Predecessor.V_FROM, new Node(g.nodes[edge.V_TO].Predecessor.V_FROM));
 
-                    int V_FROM = g.nodes[edge.V_TO].Predecessor.V_FROM;
-                    int V_TO = edge.V_TO;
-                    result.G_neu.nodes[V_FROM].AddEdge(new Edge(V_FROM, V_TO, edge.GetFlow(),edge.GetCapacity(),edge.GetCosts()));
                 }
-
+                result.G_neu = g;
             }
 
             if (NODE_T != null)

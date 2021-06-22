@@ -4,6 +4,7 @@ using System.Text;
 using MA.Interfaces;
 using MA.Classes;
 using MA.Exceptions;
+using System.Linq;
 namespace MA
 {
     public static class MinimalCostAlgorithms
@@ -67,17 +68,48 @@ namespace MA
 
         public static GraphUtils.BFSPResult FindNegativeCycle(DirectedGraph g, List<int> sources, List<int> sinks)
         {   
-            GraphUtils.BFSPResult result = new GraphUtils.BFSPResult();
-            foreach(int source in sources)
-            {
-                foreach(int sink in sinks)
-                {
-                    result = Algorithms.BFSP(g, source, sink, (Edge e) => {return e.GetCosts() * e.GetCapacity();});
-                    if (result.negativeCycleEdge != null){
-                        return result;
+            List<int> nodes = new List<int>();
+            foreach(Node node in g.nodes.Values){
+                foreach(Edge edge in node.edges){
+                    if(edge.GetCosts() < 0){
+                        nodes.Add(edge.V_FROM);
+                        break;
                     }
                 }
             }
+            GraphUtils.BFSPResult result = new GraphUtils.BFSPResult();
+            foreach(int source in nodes)
+            {
+                result = Algorithms.BFSP(g, source, null,  (Edge e) => {return e.GetCosts();});
+                if (result.negativeCycleEdge != null){
+                    Graph g_res = result.G_neu;
+                    Edge e_res = result.negativeCycleEdge;
+                    HashSet<int> set = new HashSet<int>();
+                    int S_T = -1;
+
+                    for(int node = 0; node < g_res.NUMBER_OF_NODES(); node++){
+                        if(set.Add(e_res.V_TO)){
+                            e_res = g.nodes[e_res.V_FROM].Predecessor;
+                        }else{
+                            S_T = e_res.V_TO;
+                        }
+                    }
+                    if(S_T != -1){
+                        List<Edge> cycle = new List<Edge>();
+                        Node currentNode = g.nodes[S_T];
+                        Edge predecessor = currentNode.Predecessor;
+                        cycle.Add(predecessor);
+                        currentNode = g.nodes[predecessor.V_FROM];
+                        while(currentNode.ID != S_T){
+                            predecessor = currentNode.Predecessor;
+                            cycle.Add(predecessor);
+                            currentNode = g.nodes[predecessor.V_FROM];
+                        }
+                        result.edges = cycle;
+                    }
+                }
+            }
+
             return result;
         }
 
