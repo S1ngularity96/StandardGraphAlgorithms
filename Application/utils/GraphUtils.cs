@@ -22,6 +22,12 @@ namespace MA
             public SimplePriorityQueue<int> VQueue;
             public float? DISTANCE;
         }
+
+        public struct NegativeCycleResult{
+            public float y_min;
+            public List<Edge> path;
+            public bool found;
+        }
         #endregion
 
         public static DSPResult InitDSP(Graph g, int NODE_S)

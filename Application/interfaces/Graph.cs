@@ -104,7 +104,7 @@ namespace MA.Interfaces
             {
                 foreach (Edge edge in node.edges)
                 {
-                    text += $"V_FROM: {edge.V_FROM}\t\t V_TO:{edge.V_TO}\t\t CAP:{edge.GetCapacity()}\t\t FLOW: {edge.GetFlow()}\t\t Cost: {edge.GetCosts()} \t\tFORWARD: {edge.isResidualForwad()}\n";
+                    text += $"V_FROM: {edge.V_FROM}\t\t V_TO:{edge.V_TO}\t\t CAP:{edge.GetCapacity()}\t\t FLOW: {edge.GetFlow()}\t\t Cost: {edge.GetCosts()} \t\tFORWARD: {edge.isResidualForward()}\n";
                 }
             }
             return text;
@@ -118,7 +118,7 @@ namespace MA.Interfaces
                 text += $"\nID: {node.ID}\t\t Edges: {node.edges.Count} \tMarked: {node.isMarked()} \t\t Type: {node.type}\n";
                 foreach (Edge edge in node.edges)
                 {
-                    text += $"V_TO:{edge.V_TO}\t\t CAP:{edge.GetCapacity()}\t\t FLOW: {edge.GetFlow()}\t\t Cost: {edge.GetCosts()} \t\tFORWARD: {edge.isResidualForwad()}\n";
+                    text += $"V_TO:{edge.V_TO}\t\t CAP:{edge.GetCapacity()}\t\t FLOW: {edge.GetFlow()}\t\t Cost: {edge.GetCosts()} \t\tFORWARD: {edge.isResidualForward()}\n";
                 }
             }
             return text;

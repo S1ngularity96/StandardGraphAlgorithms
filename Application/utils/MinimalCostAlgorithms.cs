@@ -17,12 +17,13 @@ namespace MA
         }
 
         public static string PrintNegativeCycleEdges(List<Edge> edges)
-        {   string text  = "";
-            if(edges == null)
+        {
+            string text = "";
+            if (edges == null)
                 return "";
-            foreach(Edge edge in edges)
+            foreach (Edge edge in edges)
             {
-                text += $"From: {edge.V_FROM}, To: {edge.V_TO}, Cost: {edge.GetCosts()} Cap: {edge.GetCapacity()}\n";
+                text += $"From: {edge.V_FROM}, To: {edge.V_TO}, Cost: {edge.GetCosts()} Cap: {edge.GetCapacity()} Forwar: {edge.isResidualForward()}\n";
             }
             return text;
         }
@@ -35,9 +36,9 @@ namespace MA
             {
                 foreach (Edge edge in n.edges)
                 {
-                    Edge forwardEdge = new Edge(edge.V_FROM, edge.V_TO,edge.GetCapacity() - edge.GetFlow(),edge.GetCosts(), forward: true);
+                    Edge forwardEdge = new Edge(edge.V_FROM, edge.V_TO, edge.GetCapacity() - edge.GetFlow(), edge.GetCosts(), forward: true);
                     Edge backwardEdge = new Edge(edge.V_TO, edge.V_FROM, edge.GetFlow(), edge.GetCosts() * -1, forward: false);
-                     
+
                     if (forwardEdge.GetCapacity() != 0)
                     {
                         G_neu.nodes[forwardEdge.V_FROM].AddEdge(forwardEdge);
@@ -56,9 +57,9 @@ namespace MA
         public static float CalculateFlowCosts(DirectedGraph g)
         {
             float costs = 0.0f;
-            foreach(Node node in g.nodes.Values)
+            foreach (Node node in g.nodes.Values)
             {
-                foreach(Edge edge in node.edges)
+                foreach (Edge edge in node.edges)
                 {
                     costs += edge.GetCosts() + edge.GetFlow();
                 }
@@ -66,61 +67,104 @@ namespace MA
             return costs;
         }
 
-        public static GraphUtils.BFSPResult FindNegativeCycle(DirectedGraph g, List<int> sources, List<int> sinks)
-        {   
+        public static List<int> FindNodesWithNegativeEdges(DirectedGraph g)
+        {
             List<int> nodes = new List<int>();
-            foreach(Node node in g.nodes.Values){
-                foreach(Edge edge in node.edges){
-                    if(edge.GetCosts() < 0){
+            foreach (Node node in g.nodes.Values)
+            {
+                foreach (Edge edge in node.edges)
+                {
+                    if (edge.GetCosts() < 0)
+                    {
                         nodes.Add(edge.V_FROM);
                         break;
                     }
                 }
             }
-            GraphUtils.BFSPResult result = new GraphUtils.BFSPResult();
-            foreach(int source in nodes)
+            return nodes;
+        }
+
+        public static DirectedGraph UpdateFlows(DirectedGraph graph, GraphUtils.NegativeCycleResult cycle){
+            float y_min = cycle.y_min;
+            List<Edge> edges = cycle.path;
+
+            foreach(Edge edge in edges){
+                if(edge.isResidualForward()){
+                    Edge e = GraphUtils.GetEdgeFromTo(graph, edge.V_FROM, edge.V_TO);
+                    e.SetFlow(e.GetFlow() + y_min);
+                }else if(edge.isResidualBackward()){
+                    Edge e = GraphUtils.GetEdgeFromTo(graph, edge.V_TO, edge.V_FROM);
+                    e.SetFlow(e.GetFlow() - y_min);
+                }
+            }
+            return graph;
+        }
+
+        public static GraphUtils.NegativeCycleResult FindNegativeCycle(DirectedGraph g)
+        {
+            GraphUtils.NegativeCycleResult cycleResult = new GraphUtils.NegativeCycleResult();
+            List<int> nodes = FindNodesWithNegativeEdges(g);
+
+            foreach (int source in nodes)
             {
-                result = Algorithms.BFSP(g, source, null,  (Edge e) => {return e.GetCosts();});
-                if (result.negativeCycleEdge != null){
+                GraphUtils.BFSPResult result = Algorithms.BFSP(g, source, null, (Edge e) => { return e.GetCosts(); });
+
+                if (result.negativeCycleEdge != null)
+                {
                     Graph g_res = result.G_neu;
                     Edge e_res = result.negativeCycleEdge;
                     HashSet<int> set = new HashSet<int>();
-                    int S_T = -1;
+                    int StartTargetNode = -1;
 
-                    for(int node = 0; node < g_res.NUMBER_OF_NODES(); node++){
-                        if(set.Add(e_res.V_TO)){
+
+                    //Backtrack path to find loop
+                    for (int node = 0; node < g_res.NUMBER_OF_NODES(); node++)
+                    {
+                        if (set.Add(e_res.V_TO))
+                        {
                             e_res = g.nodes[e_res.V_FROM].Predecessor;
-                        }else{
-                            S_T = e_res.V_TO;
+                        }
+                        else
+                        {
+                            StartTargetNode = e_res.V_TO;
+                            break;
                         }
                     }
-                    if(S_T != -1){
+
+                    //Go through loop to find y_min and edges
+                    if (StartTargetNode != -1)
+                    {
                         float y_min = float.PositiveInfinity;
                         List<Edge> cycle = new List<Edge>();
-                        Node currentNode = g.nodes[S_T];
+                        Node currentNode = g.nodes[StartTargetNode];
                         Edge predecessor = currentNode.Predecessor;
                         cycle.Add(predecessor);
-                        y_min = predecessor.GetCosts();
+                        y_min = predecessor.GetCapacity();
                         currentNode = g.nodes[predecessor.V_FROM];
-                        while(currentNode.ID != S_T){
+
+                        while (currentNode.ID != StartTargetNode)
+                        {
                             predecessor = currentNode.Predecessor;
                             cycle.Add(predecessor);
                             currentNode = g.nodes[predecessor.V_FROM];
-                            if(y_min < predecessor.GetCosts())
-                                y_min = predecessor.GetCosts();
+                            float p_cap = predecessor.GetCapacity();
+                            if (p_cap < y_min) { y_min = p_cap; }
                         }
-                        result.edges = cycle;
+                        cycleResult.found = true;
+                        cycleResult.path = cycle;
+                        cycleResult.y_min = y_min;
+                        return cycleResult;
                     }
                 }
             }
 
-            return result;
+            return cycleResult;
         }
 
 
         public static SuperNodesGraph AddSuperNodes(DirectedGraph g, List<int> sources, List<int> sinks)
         {
-            
+
             Node superSource = g.AddNode();
             Node superSink = g.AddNode();
 
@@ -137,9 +181,9 @@ namespace MA
             return new SuperNodesGraph()
             {
                 g = g,
-                supernodeIDs = new int[]{ superSource.ID, superSink.ID }
+                supernodeIDs = new int[] { superSource.ID, superSink.ID }
             };
-            
+
         }
         public static DirectedGraph RemoveSuperNodes(SuperNodesGraph supergraph, List<int> sinks)
         {
@@ -150,12 +194,12 @@ namespace MA
 
             graph.nodes.Remove(ssource);
             graph.nodes.Remove(ssink);
-            
 
 
-            foreach(int sink in sinks)
+
+            foreach (int sink in sinks)
             {
-                graph.nodes[sink].edges = graph.nodes[sink].edges.FindAll((edge) => { return !(edge.V_TO == ssink);});
+                graph.nodes[sink].edges = graph.nodes[sink].edges.FindAll((edge) => { return !(edge.V_TO == ssink); });
             }
 
             return graph;
@@ -165,7 +209,7 @@ namespace MA
             var supergraph = AddSuperNodes(g, sources, sinks);
             //Edmonds Karp
             supergraph.g.UnmarkAllNodes();
-            Algorithms.EdmondKarp(g, supergraph.supernodeIDs[0], supergraph.supernodeIDs[1]);
+            Algorithms.EdmondKarp(supergraph.g, supergraph.supernodeIDs[0], supergraph.supernodeIDs[1]);
             //Remove Super-Source/Sink
             var result = RemoveSuperNodes(supergraph, sinks);
             return result;

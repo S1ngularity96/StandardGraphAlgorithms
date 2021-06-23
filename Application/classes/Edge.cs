@@ -98,7 +98,7 @@ namespace MA.Classes
             return !this.FORWARD;
         }
 
-        public bool isResidualForwad()
+        public bool isResidualForward()
         {
             return this.FORWARD;
         }

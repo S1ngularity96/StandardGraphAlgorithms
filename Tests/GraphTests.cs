@@ -3,12 +3,14 @@ using MA.Classes;
 using MA.Interfaces;
 using System.Collections.Generic;
 using Xunit;
+using System.IO;
 using Xunit.Abstractions;
 
 namespace MA.Testing
 {
     public class GraphTests
     {
+        string SLN_DIR = "/home/andrei/Dokumente/Programmierprojekte/C#/Mathematische_Algorithmen";
         private readonly ITestOutputHelper output;
 
         public GraphTests(ITestOutputHelper outputHelper)
@@ -18,9 +20,10 @@ namespace MA.Testing
 
         [Fact]
         public void Graph1()
-        {
+        {   
+            string filepath = Path.Join(SLN_DIR, "data", "Graph1.txt");
             Graph g = new UndirectedGraph();
-            g.ReadFromFile("C:/Users/Livem/Documents/Programmierprojekte/CSharp/GraphAlgorithms/data/Graph1.txt", false);
+            g.ReadFromFile(filepath, false);
 
             Assert.Equal<int>(15, g.NUMBER_OF_NODES());
             Assert.Equal<int>(17, g.NUMBER_OF_EDGES());

@@ -3,12 +3,14 @@ using MA.Classes;
 using MA.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System;
 namespace MA.Testing
 {
     public class MinimalCostTests
     {
+        string TESTS_DIR = "/home/andrei/Dokumente/Programmierprojekte/C#/Mathematische_Algorithmen/Tests";
+        string SLN_DIR = "/home/andrei/Dokumente/Programmierprojekte/C#/Mathematische_Algorithmen";
 
-        string filepath = "C:/Users/Livem/Documents/Programmierprojekte/CSharp/GraphAlgorithms/Tests";
         struct EdgeT
         {
             public float flow;
@@ -183,10 +185,9 @@ namespace MA.Testing
                 Edge edge = GraphUtils.GetEdgeFromTo(G_neu, re.V_FROM, re.V_TO);
                 Assert.StrictEqual<float>(re.cost, edge.GetCosts());
                 Assert.StrictEqual<float>(re.capacity, edge.GetCapacity());
-                Assert.StrictEqual<bool>(re.forward, edge.isResidualForwad());
+                Assert.StrictEqual<bool>(re.forward, edge.isResidualForward());
 
             }
-
         }
 
         [Fact]
@@ -243,19 +244,53 @@ namespace MA.Testing
             var g = CreateGraphOne();
             var resudial = ResudialGraph(g);
 
+            var result = MinimalCostAlgorithms.FindNegativeCycle(resudial);
+            Assert.True(result.found);
 
+            File.WriteAllText(Path.Join(TESTS_DIR, "negative_path.log"), MinimalCostAlgorithms.PrintNegativeCycleEdges(result.path));
+            File.AppendAllText(Path.Join(TESTS_DIR, "negative_path.log"), $"y=min ={result.y_min}");
 
-            var sources = GraphUtils.GetNodeIdsOfType(g, Node.NodeType.SOURCE);
-            var sinks = GraphUtils.GetNodeIdsOfType(g, Node.NodeType.SINK);
+        }
 
-            Assert.Contains<int>(0, sources);
-            Assert.Contains<int>(1, sources);
-            Assert.Contains<int>(4, sinks);
-            Assert.Contains<int>(5, sinks);
+        [Fact]
+        public void CycleCanceling()
+        {
 
+            File.WriteAllText(Path.Join(TESTS_DIR, "cc.log"), "CycleCanceling:\n");
+            DirectedGraph g = new DirectedGraph();
+            g.ReadFromBalancedGraph(Path.Join(SLN_DIR, "data", "costminimal", "Kostenminimal1.txt"), false);
+            List<int> sources = GraphUtils.GetNodeIdsOfType(g, Node.NodeType.SOURCE);
+            List<int> sinks = GraphUtils.GetNodeIdsOfType(g, Node.NodeType.SINK);
+            float costs = 0.0f;
+            try
+            {
+                int tries = 1000;
+                int currentTry = 1;
+                DirectedGraph g_bflow = MinimalCostAlgorithms.RandomB_Flow(g, sources, sinks);
+                File.AppendAllText(Path.Join(TESTS_DIR, "cc.log"), "b_flow:\n"+g_bflow.GraphToString());
+                DirectedGraph g_residual = MinimalCostAlgorithms.CreateResidualGraph(g_bflow);
+                File.AppendAllText(Path.Join(TESTS_DIR, "cc.log"), "\n\nresidual:\n" + g_residual.GraphToString());
+                GraphUtils.NegativeCycleResult cycle = MinimalCostAlgorithms.FindNegativeCycle(g_residual);
+                File.AppendAllText(Path.Join(TESTS_DIR, "cc.log"), "\n\nnegative cycle:\n" + MinimalCostAlgorithms.PrintNegativeCycleEdges(cycle.path));
+                while (cycle.found && (currentTry != tries))
+                {
+                    g_bflow = MinimalCostAlgorithms.UpdateFlows(g_bflow, cycle);
+                    File.AppendAllText(Path.Join(TESTS_DIR, "cc.log"), "b_flow:\n" + g_bflow.GraphToString());
+                    g_residual = MinimalCostAlgorithms.CreateResidualGraph(g_bflow);
+                    File.AppendAllText(Path.Join(TESTS_DIR, "cc.log"), "\n\nresidual:\n" + g_residual.GraphToString());
+                    cycle = MinimalCostAlgorithms.FindNegativeCycle(g_residual);
+                    File.AppendAllText(Path.Join(TESTS_DIR, "cc.log"), "\n\nnegative cycle:\n" + MinimalCostAlgorithms.PrintNegativeCycleEdges(cycle.path));
+                    currentTry++;
+                }
+                costs = MinimalCostAlgorithms.CalculateFlowCosts(g_bflow);
+            }
+            catch (Exception ex)
+            {
 
-            var result = MinimalCostAlgorithms.FindNegativeCycle(resudial, sources, sinks);
-            Assert.NotNull(result.negativeCycleEdge);
+            }
+
+            Assert.StrictEqual<float>(3.0f, costs);
+
         }
     }
 }

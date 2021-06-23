@@ -1,11 +1,13 @@
 using Xunit;
 using Xunit.Abstractions;
 using MA.Classes;
+using System.IO;
 using System.Collections.Generic;
 namespace MA.Testing
 {
     public class GraphReaderTests
     {
+        string SLN_DIR = "/home/andrei/Dokumente/Programmierprojekte/C#/Mathematische_Algorithmen";
         private readonly ITestOutputHelper console;
         public GraphReaderTests(ITestOutputHelper output)
         {
@@ -49,7 +51,8 @@ namespace MA.Testing
 
             List<GraphT> graphs = new List<GraphT>(){
                 new GraphT {
-                    filepath = "C:/Users/Livem/Documents/Programmierprojekte/CSharp/GraphAlgorithms/data/costminimal/Kostenminimal2.txt",
+                     
+                    filepath = Path.Join(SLN_DIR, "data", "costminimal", "Kostenminimal2.txt"),
                     expectedNodes = new List<NodeT>(){
                         new NodeT(1.0f, Node.NodeType.SOURCE),
                         new NodeT(-1.0f,Node.NodeType.SINK),
@@ -65,7 +68,7 @@ namespace MA.Testing
                     }
                 },
                 new GraphT {
-                    filepath = "C:/Users/Livem/Documents/Programmierprojekte/CSharp/GraphAlgorithms/data/costminimal/Kostenminimal1.txt",
+                    filepath = Path.Join(SLN_DIR, "data", "costminimal", "Kostenminimal1.txt"),
                     expectedNodes = new List<NodeT>(){
                         new NodeT(4.0f, Node.NodeType.SOURCE),
                         new NodeT(-1.0f, Node.NodeType.SINK),

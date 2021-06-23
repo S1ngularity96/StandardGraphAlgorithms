@@ -75,6 +75,7 @@ namespace MA
             });
         }
 
+
         static void ShortestPathDemo()
         {
             string ROOT = System.IO.Path.Join(Config.SLN_DIR, "data");
@@ -145,7 +146,6 @@ namespace MA
                     {
                         System.Console.WriteLine($"{c.name} as {c.direction} graph: from node {c.NODE_S} to node {c.NODE_T}: Length {result.DISTANCE} using {c.algorithm}");
                     }
-
                 }
             }
         }
@@ -195,7 +195,9 @@ namespace MA
         {
             DirectedGraph g = new DirectedGraph();
             g.ReadFromBalancedGraph(System.IO.Path.Join(Config.SLN_DIR, "data", "costminimal", "Kostenminimal1.txt"), false);
-            Algorithms.CycleCanceling(g);
+            float result = Algorithms.CycleCanceling(g);
+            
+            System.Console.WriteLine($"Bflow equals {result}");
         }
 
         static void HandleParseError(IEnumerable<Error> errors)

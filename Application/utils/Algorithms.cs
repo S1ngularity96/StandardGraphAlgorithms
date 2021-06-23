@@ -641,7 +641,7 @@ namespace MA
                     }
                     return flow;
                 }
-                FlowAlgorithms.UpdateFlows(augpath, g);
+                FlowAlgorithms.UpdateFlows(augpath, ref g);
                 CURRENT_TRIE++;
             }
             throw new GraphException("EdmondKarp Algorithm failed");
@@ -651,17 +651,25 @@ namespace MA
         {
             List<int> sources = GraphUtils.GetNodeIdsOfType(g, Node.NodeType.SOURCE);
             List<int> sinks = GraphUtils.GetNodeIdsOfType(g, Node.NodeType.SINK);
+            float costs = 0.0f;
             try
             {
-                DirectedGraph g_neu = MinimalCostAlgorithms.RandomB_Flow(g, sources, sinks);
-                DirectedGraph g_residual = MinimalCostAlgorithms.CreateResidualGraph(g_neu);
-                GraphUtils.BFSPResult result = MinimalCostAlgorithms.FindNegativeCycle(g_residual, sources, sinks);
-                MinimalCostAlgorithms.PrintNegativeCycleEdges(result.edges);
+                DirectedGraph g_bflow = MinimalCostAlgorithms.RandomB_Flow(g, sources, sinks);
+                DirectedGraph g_residual = MinimalCostAlgorithms.CreateResidualGraph(g_bflow);
+                GraphUtils.NegativeCycleResult cycle = MinimalCostAlgorithms.FindNegativeCycle(g_residual);
+                while(cycle.found){
+                    g_bflow = MinimalCostAlgorithms.UpdateFlows(g_bflow, cycle);
+                    g_residual = MinimalCostAlgorithms.CreateResidualGraph(g_bflow);
+                    cycle = MinimalCostAlgorithms.FindNegativeCycle(g_residual);
+                }
+                return costs = MinimalCostAlgorithms.CalculateFlowCosts(g_bflow);
+                
+
             }catch(GraphException ex)
             {
                 System.Console.WriteLine(ex.Message);
             }
-            return 0.0f;
+            return costs;
         }
         
     }

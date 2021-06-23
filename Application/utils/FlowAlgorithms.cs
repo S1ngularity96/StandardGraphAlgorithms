@@ -43,7 +43,7 @@ namespace MA
             return G_neu;
         }
 
-        public static Graph UpdateFlows(AugmentedPath p, Graph g)
+        public static Graph UpdateFlows(AugmentedPath p, ref Graph g)
         {
 
             float yMin = p.minEdge.GetCapacity();
@@ -64,7 +64,7 @@ namespace MA
 
 
                 }
-                else if (edge.isResidualForwad())
+                else if (edge.isResidualForward())
                 {
                     foreach (Edge orig_edge in g.nodes[edge.V_FROM].edges)
                     {
@@ -100,6 +100,12 @@ namespace MA
             throw new GraphException("Could not get shortest path in Edmond Karp");
         }
 
+        public static void RemovePredecessors(Graph g){
+            foreach(Node node in g.nodes.Values){
+                node.Predecessor = null;
+            }
+        }
+
         public static AugmentedPath BFSPath(Graph g, int S, int T)
         {
 
@@ -107,7 +113,7 @@ namespace MA
             {
                 throw new GraphException("Startnode can't be the targetnode");
             }
-
+            RemovePredecessors(g);
             g.UnmarkAllNodes();
             AugmentedPath augpath = new AugmentedPath();
             //Dictionary<ParentNodeID, PathEdges>
@@ -136,13 +142,16 @@ namespace MA
                                     augpath.minEdge = parent.edge;
                                 }
                             }
+                            g.UnmarkAllNodes();
                             return augpath;
                         }
                         queue.Enqueue(g.nodes[edge.V_TO]);
                     }
                 }
             }
+            
             augpath.pathOfEdges = null;
+            g.UnmarkAllNodes();
             return augpath;
         }
     }
