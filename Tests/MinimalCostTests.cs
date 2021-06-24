@@ -8,8 +8,8 @@ namespace MA.Testing
 {
     public class MinimalCostTests
     {
-        string TESTS_DIR = "/home/andrei/Dokumente/Programmierprojekte/C#/Mathematische_Algorithmen/Tests";
-        string SLN_DIR = "/home/andrei/Dokumente/Programmierprojekte/C#/Mathematische_Algorithmen";
+        string TESTS_DIR = "C:/Users/Livem/Documents/Programmierprojekte/CSharp/GraphAlgorithms/Tests";
+        string SLN_DIR = "C:/Users/Livem/Documents/Programmierprojekte/CSharp/GraphAlgorithms";
 
         struct EdgeT
         {

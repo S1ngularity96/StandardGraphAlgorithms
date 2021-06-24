@@ -593,6 +593,7 @@ namespace MA
                 if (!updated) { break; }
             }
             //Step 3
+            result.G_neu = g;
             foreach (Edge edge in edges)
             {
 
@@ -600,9 +601,8 @@ namespace MA
                 if (calculatedDistance < g.nodes[edge.V_TO].DISTANCE)
                 {
                     result.negativeCycleEdge = edge;
-
+                    return result;
                 }
-                result.G_neu = g;
             }
 
             if (NODE_T != null)

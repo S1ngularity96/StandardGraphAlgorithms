@@ -13,7 +13,8 @@ namespace MA
         public struct SuperNodesGraph
         {
             public DirectedGraph g;
-            public int[] supernodeIDs;
+            public int supersource;
+            public int supersink;
         }
 
         public static string PrintNegativeCycleEdges(List<Edge> edges)
@@ -35,18 +36,23 @@ namespace MA
             foreach (Node n in g.nodes.Values)
             {
                 foreach (Edge edge in n.edges)
-                {
-                    Edge forwardEdge = new Edge(edge.V_FROM, edge.V_TO, edge.GetCapacity() - edge.GetFlow(), edge.GetCosts(), forward: true);
-                    Edge backwardEdge = new Edge(edge.V_TO, edge.V_FROM, edge.GetFlow(), edge.GetCosts() * -1, forward: false);
-
-                    if (forwardEdge.GetCapacity() != 0)
-                    {
-                        G_neu.nodes[forwardEdge.V_FROM].AddEdge(forwardEdge);
-                    }
-
-                    if (backwardEdge.GetCapacity() != 0)
-                    {
+                {   
+                    if(edge.GetFlow() == edge.GetCapacity()){
+                        Edge backwardEdge = new Edge(edge.V_TO, edge.V_FROM, edge.GetCapacity() ,edge.GetCosts() * -1, forward: false);
                         G_neu.nodes[backwardEdge.V_FROM].AddEdge(backwardEdge);
+                        
+                    }
+                    else if(edge.GetFlow() == 0){
+                        Edge forwardEdge = new Edge(edge.V_FROM, edge.V_TO, edge.GetCapacity(), edge.GetCosts(), forward: true);
+                        G_neu.nodes[forwardEdge.V_FROM].AddEdge(forwardEdge);
+                        
+                    }
+                    else if(edge.GetFlow() < edge.GetCapacity()){
+                        Edge forwardEdge = new Edge(edge.V_FROM, edge.V_TO, edge.GetCapacity() - edge.GetFlow(), edge.GetCosts(), forward: true);
+                        Edge backwardEdge = new Edge(edge.V_TO, edge.V_FROM, edge.GetFlow(), edge.GetCosts() * -1, forward: false);
+                        G_neu.nodes[forwardEdge.V_FROM].AddEdge(forwardEdge);
+                        G_neu.nodes[backwardEdge.V_FROM].AddEdge(backwardEdge);
+                        
                     }
                 }
             }
@@ -61,7 +67,7 @@ namespace MA
             {
                 foreach (Edge edge in node.edges)
                 {
-                    costs += edge.GetCosts() + edge.GetFlow();
+                    costs += edge.GetCosts() * edge.GetFlow();
                 }
             }
             return costs;
@@ -87,6 +93,8 @@ namespace MA
         public static DirectedGraph UpdateFlows(DirectedGraph graph, GraphUtils.NegativeCycleResult cycle){
             float y_min = cycle.y_min;
             List<Edge> edges = cycle.path;
+            
+            
 
             foreach(Edge edge in edges){
                 if(edge.isResidualForward()){
@@ -113,20 +121,21 @@ namespace MA
                 {
                     Graph g_res = result.G_neu;
                     Edge e_res = result.negativeCycleEdge;
+                    Node pre = g.nodes[e_res.V_TO];
                     HashSet<int> set = new HashSet<int>();
                     int StartTargetNode = -1;
 
 
                     //Backtrack path to find loop
                     for (int node = 0; node < g_res.NUMBER_OF_NODES(); node++)
-                    {
-                        if (set.Add(e_res.V_TO))
+                    {   
+                        if (set.Add(pre.ID))
                         {
-                            e_res = g.nodes[e_res.V_FROM].Predecessor;
+                            pre = g.nodes[pre.Predecessor.V_FROM];
                         }
                         else
                         {
-                            StartTargetNode = e_res.V_TO;
+                            StartTargetNode = pre.ID;
                             break;
                         }
                     }
@@ -181,21 +190,19 @@ namespace MA
             return new SuperNodesGraph()
             {
                 g = g,
-                supernodeIDs = new int[] { superSource.ID, superSink.ID }
+                supersink = superSink.ID,
+                supersource = superSource.ID
             };
 
         }
         public static DirectedGraph RemoveSuperNodes(SuperNodesGraph supergraph, List<int> sinks)
         {
-            int ssource = supergraph.supernodeIDs[0];
-            int ssink = supergraph.supernodeIDs[1];
+            int ssource = supergraph.supersource;
+            int ssink = supergraph.supersink;
             DirectedGraph graph = supergraph.g;
-            int[] supernodes = supergraph.supernodeIDs;
 
             graph.nodes.Remove(ssource);
             graph.nodes.Remove(ssink);
-
-
 
             foreach (int sink in sinks)
             {
@@ -204,13 +211,32 @@ namespace MA
 
             return graph;
         }
+
+        public static bool HasBalancedFlow(SuperNodesGraph supergraph, List<int> sources, List<int> sinks){
+            DirectedGraph g = supergraph.g;
+            foreach(int source in sources){
+                Edge e = GraphUtils.GetEdgeFromTo(g, supergraph.supersource, source);
+                if(e.GetCapacity() != e.GetFlow())
+                    return false;
+            }
+
+            foreach(int sink in sinks){
+                Edge e = GraphUtils.GetEdgeFromTo(g, sink, supergraph.supersink);
+                if(e.GetCapacity() != e.GetFlow())
+                    return false;
+            }
+
+            return true;
+        }
+
         public static DirectedGraph RandomB_Flow(DirectedGraph g, List<int> sources, List<int> sinks)
         {
             var supergraph = AddSuperNodes(g, sources, sinks);
-            //Edmonds Karp
             supergraph.g.UnmarkAllNodes();
-            Algorithms.EdmondKarp(supergraph.g, supergraph.supernodeIDs[0], supergraph.supernodeIDs[1]);
-            //Remove Super-Source/Sink
+            Algorithms.EdmondKarp(supergraph.g, supergraph.supersource, supergraph.supersink);
+            if(!HasBalancedFlow(supergraph, sources, sinks))
+                throw new BalancedFlowMissingException("Balanced flow can not be created");
+
             var result = RemoveSuperNodes(supergraph, sinks);
             return result;
         }

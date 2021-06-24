@@ -7,7 +7,7 @@ namespace MA.Testing
 {
     public class GraphReaderTests
     {
-        string SLN_DIR = "/home/andrei/Dokumente/Programmierprojekte/C#/Mathematische_Algorithmen";
+        string SLN_DIR = "C:/Users/Livem/Documents/Programmierprojekte/CSharp/GraphAlgorithms";
         private readonly ITestOutputHelper console;
         public GraphReaderTests(ITestOutputHelper output)
         {

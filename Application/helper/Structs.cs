@@ -19,8 +19,14 @@ namespace MA.Helper
             public string filename;
             public int NODE_S;
             public int NODE_T;
-
         }
+
+        public struct MinCostDemoObject{
+            public string name;
+            public string filename;
+        }
+
+
     }
 
 }

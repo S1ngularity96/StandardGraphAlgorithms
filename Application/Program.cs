@@ -136,7 +136,7 @@ namespace MA
 
                 if (c.algorithm == Algorithms.SP.BELLMAN)
                 {
-                    GraphUtils.BFSPResult result = Algorithms.BFSP(g, c.NODE_S, c.NODE_T, (Edge edge) => { return edge.GetCapacity();} );
+                    GraphUtils.BFSPResult result = Algorithms.BFSP(g, c.NODE_S, c.NODE_T, (Edge edge) => { return edge.GetCapacity(); });
                     if (result.negativeCycleEdge != null)
                     {
                         System.Console.ForegroundColor = System.ConsoleColor.Red;
@@ -194,11 +194,57 @@ namespace MA
         static void MinCostDemo()
         {
             DirectedGraph g = new DirectedGraph();
-            g.ReadFromBalancedGraph(System.IO.Path.Join(Config.SLN_DIR, "data", "costminimal", "Kostenminimal1.txt"), false);
-            float result = Algorithms.CycleCanceling(g);
-            
-            System.Console.WriteLine($"Bflow equals {result}");
+            string ROOT = System.IO.Path.Join(Config.SLN_DIR, "data", "costminimal");
+            Helper.Structs.MinCostDemoObject[] cases = {
+                new Structs.MinCostDemoObject(){
+                    name = "Kostenminimal1",
+                    filename = System.IO.Path.Join(ROOT, "Kostenminimal1.txt")
+                },
+                new Structs.MinCostDemoObject(){
+                    name = "Kostenminimal2",
+                    filename = System.IO.Path.Join(ROOT, "Kostenminimal2.txt")
+                },
+                new Structs.MinCostDemoObject(){
+                    name = "Kostenminimal3",
+                    filename = System.IO.Path.Join(ROOT, "Kostenminimal3.txt")
+                },
+                new Structs.MinCostDemoObject(){
+                    name = "Kostenminimal4",
+                    filename = System.IO.Path.Join(ROOT, "Kostenminimal4.txt")
+                },
+                new Structs.MinCostDemoObject(){
+                    name = "Kostenminimal_gross1",
+                    filename = System.IO.Path.Join(ROOT, "Kostenminimal_gross1.txt")
+                },
+                new Structs.MinCostDemoObject(){
+                    name = "Kostenminimal_gross2",
+                    filename = System.IO.Path.Join(ROOT, "Kostenminimal_gross2.txt")
+                },
+                new Structs.MinCostDemoObject(){
+                    name = "Kostenminimal_gross3",
+                    filename = System.IO.Path.Join(ROOT, "Kostenminimal_gross3.txt")
+                }
+
+            };
+
+            foreach (Helper.Structs.MinCostDemoObject mccase in cases)
+            {
+                try
+                {
+                    System.Console.ForegroundColor = System.ConsoleColor.Green;
+                    g.ReadFromBalancedGraph(mccase.filename, false);
+                    float result = Algorithms.CycleCanceling(g);
+                    System.Console.WriteLine($"{mccase.name}: {result}");
+                }
+                catch (BalancedFlowMissingException)
+                {
+                    System.Console.ForegroundColor = System.ConsoleColor.Red;
+                    System.Console.WriteLine($"{mccase.name}: Kein B-Fluss möglich!");
+                }
+            }
+            System.Console.ForegroundColor = System.ConsoleColor.Gray;
         }
+
 
         static void HandleParseError(IEnumerable<Error> errors)
         {
