@@ -93,8 +93,6 @@ namespace MA
         public static DirectedGraph UpdateFlows(DirectedGraph graph, GraphUtils.NegativeCycleResult cycle){
             float y_min = cycle.y_min;
             List<Edge> edges = cycle.path;
-            
-            
 
             foreach(Edge edge in edges){
                 if(edge.isResidualForward()){
@@ -125,7 +123,6 @@ namespace MA
                     HashSet<int> set = new HashSet<int>();
                     int StartTargetNode = -1;
 
-
                     //Backtrack path to find loop
                     for (int node = 0; node < g_res.NUMBER_OF_NODES(); node++)
                     {   
@@ -143,30 +140,29 @@ namespace MA
                     //Go through loop to find y_min and edges
                     if (StartTargetNode != -1)
                     {
-                        float y_min = float.PositiveInfinity;
-                        List<Edge> cycle = new List<Edge>();
+                        //init values
+                        cycleResult.y_min = float.PositiveInfinity;
+                        cycleResult.path  = new List<Edge>();
+
                         Node currentNode = g.nodes[StartTargetNode];
                         Edge predecessor = currentNode.Predecessor;
-                        cycle.Add(predecessor);
-                        y_min = predecessor.GetCapacity();
+                        cycleResult.path.Add(predecessor);
+                        cycleResult.y_min = predecessor.GetCapacity();
                         currentNode = g.nodes[predecessor.V_FROM];
 
                         while (currentNode.ID != StartTargetNode)
                         {
                             predecessor = currentNode.Predecessor;
-                            cycle.Add(predecessor);
+                            cycleResult.path.Add(predecessor);
                             currentNode = g.nodes[predecessor.V_FROM];
                             float p_cap = predecessor.GetCapacity();
-                            if (p_cap < y_min) { y_min = p_cap; }
+                            if (p_cap < cycleResult.y_min) { cycleResult.y_min = p_cap; }
                         }
                         cycleResult.found = true;
-                        cycleResult.path = cycle;
-                        cycleResult.y_min = y_min;
                         return cycleResult;
                     }
                 }
             }
-
             return cycleResult;
         }
 
