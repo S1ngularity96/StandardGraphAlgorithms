@@ -11,7 +11,7 @@
             "preLaunchTask": "build",
             "program": "${workspaceFolder}/Application/bin/Debug/netcoreapp3.1/GraphAlgorithms.dll",
             "args": [
-                "--mincost"
+                "--mincostssp"
             ],
             "cwd": "${workspaceFolder}/Application",
             "console": "internalConsole",
