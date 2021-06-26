@@ -30,5 +30,5 @@
 - [x] Edmond-Karp
 
 ### Minimum-Cost-Flow
-- [x] Cycle-Canceling-Alg.
-- [ ] Successove-Shortest-Path-Alg
+- [x] cycle canceling
+- [ ] successive shortest path
