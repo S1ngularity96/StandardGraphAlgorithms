@@ -378,18 +378,24 @@ namespace MA.Testing
 
                 System.Console.ForegroundColor = System.ConsoleColor.Green;
                 g.ReadFromBalancedGraph(mccase.filename, false);
+                File.WriteAllText(Path.Join(Config.TESTS_DIR,"ssp.log"), $"{mccase.name}\n{mccase.filename}\n\n");
 
                 if (mccase.expectedException)
                 {
-                    Assert.Throws<BalancedFlowMissingException>(() =>
-                    {
-                        Algorithms.SuccessiveShortestPath(g);
-                    });
+                    Assert.Throws<BalancedFlowMissingException>(() => { Algorithms.SuccessiveShortestPath(g); });
+                    
                 }
                 else
-                {
-                    float result = Algorithms.SuccessiveShortestPath(g);
-                    Assert.StrictEqual<float>(mccase.expectedValue, result);
+                {   
+                    try{
+                        float result = Algorithms.SuccessiveShortestPath(g);
+                        Assert.StrictEqual<float>(mccase.expectedValue, result);
+                    }catch(BalancedFlowMissingException ex){
+                        Assert.False(true, $"Exception should not be thrown here!!!\n{ex.Message}");
+                    }catch(GraphException ex){
+                        Assert.False(true, $"Exception should not be thrown here!!!\n{ex.Message}");
+                    }
+                    
                 }
 
 

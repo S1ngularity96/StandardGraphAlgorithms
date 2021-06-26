@@ -60,7 +60,41 @@ namespace MA
                     }
                     components++;
                 }
+            }
+            g.UnmarkAllNodes();
+            return components;
+        }
 
+        public static List<List<int>> GraphComponents(Graph g){
+            g.UnmarkAllNodes();
+            List<List<int>> components = new List<List<int>>();
+            Queue<Node> queue = new Queue<Node>();
+            // Foreach Graph-Component
+            int NUMBER_OF_NODES = g.NUMBER_OF_NODES();
+            for (int current_node = 0; current_node < NUMBER_OF_NODES; current_node++)
+            {
+                Node node = g.nodes[current_node];
+                if (!node.isMarked())
+                {
+                    List<int> currentComponent = new List<int>();
+                    components.Add(currentComponent);
+                    node.mark();
+                    currentComponent.Add(node.ID);
+                    queue.Enqueue(node);
+                    // BreadthSearch itself
+                    while (queue.Count > 0)
+                    {
+                        Node firstNode = queue.Dequeue();
+                        List<Node> neighbours = GraphUtils.GetUnmarkedNeighbours(g, firstNode.ID);
+
+                        foreach (Node neighbour in neighbours)
+                        {
+                            neighbour.mark();
+                            currentComponent.Add(neighbour.ID);
+                            queue.Enqueue(neighbour);
+                        }
+                    }
+                }
             }
             return components;
         }
@@ -678,6 +712,29 @@ namespace MA
             float costs = 0.0f;
             
             try{
+                var ssp_graph = MinimalCostAlgorithms.InitSSP(g);
+                var ssp_residual = MinimalCostAlgorithms.CreateResidualGraphSSP(ssp_graph);
+                var pair = MinimalCostAlgorithms.FindSSPPair(ssp_graph,ssp_residual);
+
+                while(pair.found){
+                    var sp_result = MinimalCostAlgorithms.FindShortestPath(ssp_residual, pair.source, pair.target);
+                    if(!sp_result.pathExists){
+                        throw new GraphException("No path between sources and sinks exists");
+                    }
+                    
+                    ssp_graph = MinimalCostAlgorithms.UpdateFlowsSSP(ssp_graph,sp_result);
+                    ssp_residual = MinimalCostAlgorithms.CreateResidualGraphSSP(ssp_graph);
+                    pair = MinimalCostAlgorithms.FindSSPPair(ssp_graph, ssp_residual);
+                }
+
+                foreach(Node node in ssp_graph.nodes.Values){
+                    if(node.GetBalance() != ssp_residual.nodes[node.ID].GetR_Balance()){
+                        throw new BalancedFlowMissingException("Balance of graph does not equal resudial balance");
+                    }
+                }
+
+                return costs = MinimalCostAlgorithms.CalculateFlowCosts(ssp_graph);
+
 
             }catch(GraphException ex){
                 System.Console.WriteLine(ex.Message);

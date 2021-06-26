@@ -31,9 +31,13 @@ namespace MA
                 MaxFlowDemo();
             }
 
-            if (options.mincostdemo)
+            if (options.mincostdemocc)
             {
-                MinCostDemo();
+                MinCostDemoCC();
+            }
+
+            if(options.mincostdemossp){
+                MinCostDemoSSP();
             }
 
             if (options.File != null)
@@ -191,7 +195,7 @@ namespace MA
             }
         }
 
-        static void MinCostDemo()
+        static void MinCostDemoCC()
         {
             DirectedGraph g = new DirectedGraph();
             string ROOT = System.IO.Path.Join(Config.SLN_DIR, "data", "costminimal");
@@ -244,6 +248,60 @@ namespace MA
             }
             System.Console.ForegroundColor = System.ConsoleColor.Gray;
         }
+
+        static void MinCostDemoSSP(){
+            DirectedGraph g = new DirectedGraph();
+            string ROOT = System.IO.Path.Join(Config.SLN_DIR, "data", "costminimal");
+            Helper.Structs.MinCostDemoObject[] cases = {
+                new Structs.MinCostDemoObject(){
+                    name = "Kostenminimal1",
+                    filename = System.IO.Path.Join(ROOT, "Kostenminimal1.txt")
+                },
+                /*new Structs.MinCostDemoObject(){
+                    name = "Kostenminimal2",
+                    filename = System.IO.Path.Join(ROOT, "Kostenminimal2.txt")
+                },
+                new Structs.MinCostDemoObject(){
+                    name = "Kostenminimal3",
+                    filename = System.IO.Path.Join(ROOT, "Kostenminimal3.txt")
+                },
+                new Structs.MinCostDemoObject(){
+                    name = "Kostenminimal4",
+                    filename = System.IO.Path.Join(ROOT, "Kostenminimal4.txt")
+                },
+                new Structs.MinCostDemoObject(){
+                    name = "Kostenminimal_gross1",
+                    filename = System.IO.Path.Join(ROOT, "Kostenminimal_gross1.txt")
+                },
+                new Structs.MinCostDemoObject(){
+                    name = "Kostenminimal_gross2",
+                    filename = System.IO.Path.Join(ROOT, "Kostenminimal_gross2.txt")
+                },
+                new Structs.MinCostDemoObject(){
+                    name = "Kostenminimal_gross3",
+                    filename = System.IO.Path.Join(ROOT, "Kostenminimal_gross3.txt")
+                }*/
+
+            };
+
+            foreach (Helper.Structs.MinCostDemoObject mccase in cases)
+            {
+                try
+                {
+                    System.Console.ForegroundColor = System.ConsoleColor.Green;
+                    g.ReadFromBalancedGraph(mccase.filename, false);
+                    float result = Algorithms.SuccessiveShortestPath(g);
+                    System.Console.WriteLine($"{mccase.name}: {result}");
+                }
+                catch (BalancedFlowMissingException)
+                {
+                    System.Console.ForegroundColor = System.ConsoleColor.Red;
+                    System.Console.WriteLine($"{mccase.name}: Kein B-Fluss möglich!");
+                }
+            }
+            System.Console.ForegroundColor = System.ConsoleColor.Gray;
+        }
+
 
 
         static void HandleParseError(IEnumerable<Error> errors)
