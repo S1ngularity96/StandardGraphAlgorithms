@@ -29,37 +29,6 @@ namespace MA
             return text;
         }
 
-        public static DirectedGraph CreateResidualGraph(DirectedGraph g)
-        {
-            DirectedGraph G_neu = new DirectedGraph();
-            G_neu.nodes = new Collections.NodeSet(g.NUMBER_OF_NODES());
-            foreach (Node n in g.nodes.Values)
-            {
-                foreach (Edge edge in n.edges)
-                {   
-                    if(edge.GetFlow() == edge.GetCapacity()){
-                        Edge backwardEdge = new Edge(edge.V_TO, edge.V_FROM, edge.GetCapacity() ,edge.GetCosts() * -1, forward: false);
-                        G_neu.nodes[backwardEdge.V_FROM].AddEdge(backwardEdge);
-                        
-                    }
-                    else if(edge.GetFlow() == 0){
-                        Edge forwardEdge = new Edge(edge.V_FROM, edge.V_TO, edge.GetCapacity(), edge.GetCosts(), forward: true);
-                        G_neu.nodes[forwardEdge.V_FROM].AddEdge(forwardEdge);
-                        
-                    }
-                    else if(edge.GetFlow() < edge.GetCapacity()){
-                        Edge forwardEdge = new Edge(edge.V_FROM, edge.V_TO, edge.GetCapacity() - edge.GetFlow(), edge.GetCosts(), forward: true);
-                        Edge backwardEdge = new Edge(edge.V_TO, edge.V_FROM, edge.GetFlow(), edge.GetCosts() * -1, forward: false);
-                        G_neu.nodes[forwardEdge.V_FROM].AddEdge(forwardEdge);
-                        G_neu.nodes[backwardEdge.V_FROM].AddEdge(backwardEdge);
-                        
-                    }
-                }
-            }
-            return G_neu;
-        }
-
-
         public static float CalculateFlowCosts(DirectedGraph g)
         {
             float costs = 0.0f;
@@ -90,7 +59,80 @@ namespace MA
             return nodes;
         }
 
-        public static DirectedGraph UpdateFlows(DirectedGraph graph, GraphUtils.NegativeCycleResult cycle){
+        public static SuperNodesGraph AddSuperNodes(DirectedGraph g, List<int> sources, List<int> sinks)
+        {
+
+            Node superSource = g.AddNode();
+            Node superSink = g.AddNode();
+
+            foreach (int source in sources)
+            {
+                Node observedSource = g.nodes[source];
+                superSource.AddEdge(new Edge(superSource.ID, observedSource.ID, 0.0f, observedSource.GetBalance()));
+            }
+            foreach (int sink in sinks)
+            {
+                Node observedSink = g.nodes[sink];
+                observedSink.AddEdge(new Edge(observedSink.ID, superSink.ID, 0.0f, Math.Abs(observedSink.GetBalance())));
+            }
+            return new SuperNodesGraph()
+            {
+                g = g,
+                supersink = superSink.ID,
+                supersource = superSource.ID
+            };
+
+        }
+        public static DirectedGraph RemoveSuperNodes(SuperNodesGraph supergraph, List<int> sinks)
+        {
+            int ssource = supergraph.supersource;
+            int ssink = supergraph.supersink;
+            DirectedGraph graph = supergraph.g;
+
+            graph.nodes.Remove(ssource);
+            graph.nodes.Remove(ssink);
+
+            foreach (int sink in sinks)
+            {
+                graph.nodes[sink].edges = graph.nodes[sink].edges.FindAll((edge) => { return !(edge.V_TO == ssink); });
+            }
+
+            return graph;
+        }
+
+
+        #region CycleCanceling
+        public static DirectedGraph CreateResidualGraphCC(DirectedGraph g)
+        {
+            DirectedGraph G_neu = new DirectedGraph();
+            G_neu.nodes = new Collections.NodeSet(g.NUMBER_OF_NODES());
+            foreach (Node n in g.nodes.Values)
+            {
+                foreach (Edge edge in n.edges)
+                {   
+                    if(edge.GetFlow() == edge.GetCapacity()){
+                        Edge backwardEdge = new Edge(edge.V_TO, edge.V_FROM, edge.GetCapacity() ,edge.GetCosts() * -1, forward: false);
+                        G_neu.nodes[backwardEdge.V_FROM].AddEdge(backwardEdge);
+                        
+                    }
+                    else if(edge.GetFlow() == 0){
+                        Edge forwardEdge = new Edge(edge.V_FROM, edge.V_TO, edge.GetCapacity(), edge.GetCosts(), forward: true);
+                        G_neu.nodes[forwardEdge.V_FROM].AddEdge(forwardEdge);
+                        
+                    }
+                    else if(edge.GetFlow() < edge.GetCapacity()){
+                        Edge forwardEdge = new Edge(edge.V_FROM, edge.V_TO, edge.GetCapacity() - edge.GetFlow(), edge.GetCosts(), forward: true);
+                        Edge backwardEdge = new Edge(edge.V_TO, edge.V_FROM, edge.GetFlow(), edge.GetCosts() * -1, forward: false);
+                        G_neu.nodes[forwardEdge.V_FROM].AddEdge(forwardEdge);
+                        G_neu.nodes[backwardEdge.V_FROM].AddEdge(backwardEdge);
+                        
+                    }
+                }
+            }
+            return G_neu;
+        }
+
+        public static DirectedGraph UpdateFlowsCC(DirectedGraph graph, GraphUtils.NegativeCycleResult cycle){
             float y_min = cycle.y_min;
             List<Edge> edges = cycle.path;
             
@@ -170,48 +212,6 @@ namespace MA
             return cycleResult;
         }
 
-
-        public static SuperNodesGraph AddSuperNodes(DirectedGraph g, List<int> sources, List<int> sinks)
-        {
-
-            Node superSource = g.AddNode();
-            Node superSink = g.AddNode();
-
-            foreach (int source in sources)
-            {
-                Node observedSource = g.nodes[source];
-                superSource.AddEdge(new Edge(superSource.ID, observedSource.ID, 0.0f, observedSource.GetBalance()));
-            }
-            foreach (int sink in sinks)
-            {
-                Node observedSink = g.nodes[sink];
-                observedSink.AddEdge(new Edge(observedSink.ID, superSink.ID, 0.0f, Math.Abs(observedSink.GetBalance())));
-            }
-            return new SuperNodesGraph()
-            {
-                g = g,
-                supersink = superSink.ID,
-                supersource = superSource.ID
-            };
-
-        }
-        public static DirectedGraph RemoveSuperNodes(SuperNodesGraph supergraph, List<int> sinks)
-        {
-            int ssource = supergraph.supersource;
-            int ssink = supergraph.supersink;
-            DirectedGraph graph = supergraph.g;
-
-            graph.nodes.Remove(ssource);
-            graph.nodes.Remove(ssink);
-
-            foreach (int sink in sinks)
-            {
-                graph.nodes[sink].edges = graph.nodes[sink].edges.FindAll((edge) => { return !(edge.V_TO == ssink); });
-            }
-
-            return graph;
-        }
-
         public static bool HasBalancedFlow(SuperNodesGraph supergraph, List<int> sources, List<int> sinks){
             DirectedGraph g = supergraph.g;
             foreach(int source in sources){
@@ -240,5 +240,17 @@ namespace MA
             var result = RemoveSuperNodes(supergraph, sinks);
             return result;
         }
+
+        #endregion
+
+        
+        #region SuccessiveShortestPath
+        
+
+        #endregion
+
+        
+
+
     }
 }

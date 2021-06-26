@@ -1,15 +1,13 @@
 using Xunit;
 using MA.Classes;
-using MA.Collections;
+using MA.Exceptions;
 using System.Collections.Generic;
 using System.IO;
-using System;
 namespace MA.Testing
 {
     public class MinimalCostTests
     {
-        string TESTS_DIR = "C:/Users/Livem/Documents/Programmierprojekte/CSharp/GraphAlgorithms/Tests";
-        string SLN_DIR = "C:/Users/Livem/Documents/Programmierprojekte/CSharp/GraphAlgorithms";
+
 
         struct EdgeT
         {
@@ -49,6 +47,14 @@ namespace MA.Testing
                 this.cost = cost;
                 this.capacity = capacity;
             }
+        }
+
+        struct MinCostTestObject
+        {
+            public string name;
+            public string filename;
+            public float expectedValue;
+            public bool expectedException;
         }
 
         struct GraphT
@@ -156,7 +162,7 @@ namespace MA.Testing
 
         public DirectedGraph ResudialGraph(DirectedGraph g)
         {
-            return MinimalCostAlgorithms.CreateResidualGraph(g);
+            return MinimalCostAlgorithms.CreateResidualGraphCC(g);
         }
 
         [Fact]
@@ -247,8 +253,8 @@ namespace MA.Testing
             var result = MinimalCostAlgorithms.FindNegativeCycle(resudial);
             Assert.True(result.found);
 
-            File.WriteAllText(Path.Join(TESTS_DIR, "negative_path.log"), MinimalCostAlgorithms.PrintNegativeCycleEdges(result.path));
-            File.AppendAllText(Path.Join(TESTS_DIR, "negative_path.log"), $"y=min ={result.y_min}");
+            File.WriteAllText(Path.Join(Config.TESTS_DIR, "negative_path.log"), MinimalCostAlgorithms.PrintNegativeCycleEdges(result.path));
+            File.AppendAllText(Path.Join(Config.TESTS_DIR, "negative_path.log"), $"y=min ={result.y_min}");
 
         }
 
@@ -256,41 +262,139 @@ namespace MA.Testing
         public void CycleCanceling()
         {
 
-            File.WriteAllText(Path.Join(TESTS_DIR, "cc.log"), "CycleCanceling:\n");
             DirectedGraph g = new DirectedGraph();
-            g.ReadFromBalancedGraph(Path.Join(SLN_DIR, "data", "costminimal", "Kostenminimal1.txt"), false);
-            List<int> sources = GraphUtils.GetNodeIdsOfType(g, Node.NodeType.SOURCE);
-            List<int> sinks = GraphUtils.GetNodeIdsOfType(g, Node.NodeType.SINK);
-            float costs = 0.0f;
-            try
-            {
-                int tries = 1000;
-                int currentTry = 1;
-                DirectedGraph g_bflow = MinimalCostAlgorithms.RandomB_Flow(g, sources, sinks);
-                File.AppendAllText(Path.Join(TESTS_DIR, "cc.log"), "b_flow:\n"+g_bflow.GraphToString());
-                DirectedGraph g_residual = MinimalCostAlgorithms.CreateResidualGraph(g_bflow);
-                File.AppendAllText(Path.Join(TESTS_DIR, "cc.log"), "\n\nresidual:\n" + g_residual.GraphToString());
-                GraphUtils.NegativeCycleResult cycle = MinimalCostAlgorithms.FindNegativeCycle(g_residual);
-                File.AppendAllText(Path.Join(TESTS_DIR, "cc.log"), "\n\nnegative cycle:\n" + MinimalCostAlgorithms.PrintNegativeCycleEdges(cycle.path));
-                while (cycle.found && (currentTry != tries))
-                {
-                    g_bflow = MinimalCostAlgorithms.UpdateFlows(g_bflow, cycle);
-                    File.AppendAllText(Path.Join(TESTS_DIR, "cc.log"), "b_flow:\n" + g_bflow.GraphToString());
-                    g_residual = MinimalCostAlgorithms.CreateResidualGraph(g_bflow);
-                    File.AppendAllText(Path.Join(TESTS_DIR, "cc.log"), "\n\nresidual:\n" + g_residual.GraphToString());
-                    cycle = MinimalCostAlgorithms.FindNegativeCycle(g_residual);
-                    File.AppendAllText(Path.Join(TESTS_DIR, "cc.log"), "\n\nnegative cycle:\n" + MinimalCostAlgorithms.PrintNegativeCycleEdges(cycle.path));
-                    currentTry++;
+            string ROOT = System.IO.Path.Join(Config.SLN_DIR, "data", "costminimal");
+            MinCostTestObject[] cases = {
+                new MinCostTestObject(){
+                    name = "Kostenminimal1",
+                    filename = System.IO.Path.Join(ROOT, "Kostenminimal1.txt"),
+                    expectedException = false,
+                    expectedValue = 3
+                },
+                new MinCostTestObject(){
+                    name = "Kostenminimal2",
+                    filename = System.IO.Path.Join(ROOT, "Kostenminimal2.txt"),
+                    expectedException = false,
+                    expectedValue = 0
+                },
+                new MinCostTestObject(){
+                    name = "Kostenminimal3",
+                    filename = System.IO.Path.Join(ROOT, "Kostenminimal3.txt"),
+                    expectedException = true
+                },
+                new MinCostTestObject(){
+                    name = "Kostenminimal4",
+                    filename = System.IO.Path.Join(ROOT, "Kostenminimal4.txt"),
+                    expectedException = true
+                },
+                new MinCostTestObject(){
+                    name = "Kostenminimal_gross1",
+                    filename = System.IO.Path.Join(ROOT, "Kostenminimal_gross1.txt"),
+                    expectedValue = 1537
+                },
+                new MinCostTestObject(){
+                    name = "Kostenminimal_gross2",
+                    filename = System.IO.Path.Join(ROOT, "Kostenminimal_gross2.txt"),
+                    expectedValue = 1838
+                },
+                new MinCostTestObject(){
+                    name = "Kostenminimal_gross3",
+                    filename = System.IO.Path.Join(ROOT, "Kostenminimal_gross3.txt"),
+                    expectedException = true
                 }
-                costs = MinimalCostAlgorithms.CalculateFlowCosts(g_bflow);
-            }
-            catch (Exception ex)
+
+            };
+
+            foreach (MinCostTestObject mccase in cases)
             {
 
+                System.Console.ForegroundColor = System.ConsoleColor.Green;
+                g.ReadFromBalancedGraph(mccase.filename, false);
+
+                if (mccase.expectedException)
+                {
+                    Assert.Throws<BalancedFlowMissingException>(() =>
+                    {
+                        Algorithms.CycleCanceling(g);
+                    });
+                }
+                else
+                {
+                    float result = Algorithms.CycleCanceling(g);
+                    Assert.StrictEqual<float>(mccase.expectedValue, result);
+                }
+
+
             }
-
-            Assert.StrictEqual<float>(3.0f, costs);
-
         }
+
+        [Fact]
+        public void SuccessiveShortestPath(){
+            DirectedGraph g = new DirectedGraph();
+            string ROOT = System.IO.Path.Join(Config.SLN_DIR, "data", "costminimal");
+            MinCostTestObject[] cases = {
+                new MinCostTestObject(){
+                    name = "Kostenminimal1",
+                    filename = System.IO.Path.Join(ROOT, "Kostenminimal1.txt"),
+                    expectedException = false,
+                    expectedValue = 3
+                },
+                new MinCostTestObject(){
+                    name = "Kostenminimal2",
+                    filename = System.IO.Path.Join(ROOT, "Kostenminimal2.txt"),
+                    expectedException = false,
+                    expectedValue = 0
+                },
+                new MinCostTestObject(){
+                    name = "Kostenminimal3",
+                    filename = System.IO.Path.Join(ROOT, "Kostenminimal3.txt"),
+                    expectedException = true
+                },
+                new MinCostTestObject(){
+                    name = "Kostenminimal4",
+                    filename = System.IO.Path.Join(ROOT, "Kostenminimal4.txt"),
+                    expectedException = true
+                },
+                new MinCostTestObject(){
+                    name = "Kostenminimal_gross1",
+                    filename = System.IO.Path.Join(ROOT, "Kostenminimal_gross1.txt"),
+                    expectedValue = 1537
+                },
+                new MinCostTestObject(){
+                    name = "Kostenminimal_gross2",
+                    filename = System.IO.Path.Join(ROOT, "Kostenminimal_gross2.txt"),
+                    expectedValue = 1838
+                },
+                new MinCostTestObject(){
+                    name = "Kostenminimal_gross3",
+                    filename = System.IO.Path.Join(ROOT, "Kostenminimal_gross3.txt"),
+                    expectedException = true
+                }
+
+            };
+
+            foreach (MinCostTestObject mccase in cases)
+            {
+
+                System.Console.ForegroundColor = System.ConsoleColor.Green;
+                g.ReadFromBalancedGraph(mccase.filename, false);
+
+                if (mccase.expectedException)
+                {
+                    Assert.Throws<BalancedFlowMissingException>(() =>
+                    {
+                        Algorithms.SuccessiveShortestPath(g);
+                    });
+                }
+                else
+                {
+                    float result = Algorithms.SuccessiveShortestPath(g);
+                    Assert.StrictEqual<float>(mccase.expectedValue, result);
+                }
+
+
+            }
+        }
+
     }
 }

@@ -655,11 +655,11 @@ namespace MA
             try
             {
                 DirectedGraph g_bflow = MinimalCostAlgorithms.RandomB_Flow(g, sources, sinks);
-                DirectedGraph g_residual = MinimalCostAlgorithms.CreateResidualGraph(g_bflow);
+                DirectedGraph g_residual = MinimalCostAlgorithms.CreateResidualGraphCC(g_bflow);
                 GraphUtils.NegativeCycleResult cycle = MinimalCostAlgorithms.FindNegativeCycle(g_residual);
                 while(cycle.found){
-                    g_bflow = MinimalCostAlgorithms.UpdateFlows(g_bflow, cycle);
-                    g_residual = MinimalCostAlgorithms.CreateResidualGraph(g_bflow);
+                    g_bflow = MinimalCostAlgorithms.UpdateFlowsCC(g_bflow, cycle);
+                    g_residual = MinimalCostAlgorithms.CreateResidualGraphCC(g_bflow);
                     cycle = MinimalCostAlgorithms.FindNegativeCycle(g_residual);
                 }
                 return costs = MinimalCostAlgorithms.CalculateFlowCosts(g_bflow);
@@ -671,6 +671,20 @@ namespace MA
             }
             return costs;
         }
+
+        public static float SuccessiveShortestPath(DirectedGraph g){
+            List<int> sources = GraphUtils.GetNodeIdsOfType(g, Node.NodeType.SOURCE);
+            List<int> sinks = GraphUtils.GetNodeIdsOfType(g, Node.NodeType.SINK);
+            float costs = 0.0f;
+            
+            try{
+
+            }catch(GraphException ex){
+                System.Console.WriteLine(ex.Message);
+            }
+            return costs;
+        }
+
         
     }
 }
