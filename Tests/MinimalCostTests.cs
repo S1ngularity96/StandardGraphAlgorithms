@@ -27,6 +27,8 @@ namespace MA.Testing
         {
             public int ID;
             public float balance;
+            public float r_balance;
+            public float b_diff;
             public Node.NodeType type;
             public List<EdgeT> Edges;
         }
@@ -111,6 +113,26 @@ namespace MA.Testing
             return g;
         }
 
+        private DirectedGraph CreateFromGraphT(GraphT graphT)
+        {
+            DirectedGraph g = new DirectedGraph();
+            foreach (NodeT nodeT in graphT.nodes)
+            {
+                var node = new Node(nodeT.ID);
+                node.SetBalance(nodeT.balance);
+                if (nodeT.Edges != null)
+                {
+                    foreach (EdgeT edge in nodeT.Edges)
+                    {
+                        node.AddEdge(new Edge(nodeT.ID, edge.V_TO, edge.flow, edge.cap, edge.cost));
+                    }
+                }
+
+                g.nodes.Push(node.ID, node);
+            }
+            return g;
+        }
+
         public DirectedGraph CreateGraphOne()
         {
             GraphT graphT = new GraphT()
@@ -142,22 +164,41 @@ namespace MA.Testing
             };
 
 
-            DirectedGraph g = new DirectedGraph();
-            foreach (NodeT nodeT in graphT.nodes)
+            return CreateFromGraphT(graphT);
+        }
+
+
+        public DirectedGraph CreateGraphTwo()
+        {
+
+            DirectedGraph graph = new DirectedGraph();
+            GraphT graphT = new GraphT()
             {
-                var node = new Node(nodeT.ID);
-                node.SetBalance(nodeT.balance);
-                if (nodeT.Edges != null)
-                {
-                    foreach (EdgeT edge in nodeT.Edges)
-                    {
-                        node.AddEdge(new Edge(nodeT.ID, edge.V_TO, edge.flow, edge.cap, edge.cost));
+                nodes = new List<NodeT>(){
+                    new NodeT(){ID = 0, balance = 6.0f, // A
+                        Edges = new List<EdgeT>(){
+                            new EdgeT(1, 0,4,2),
+                            new EdgeT(2, 0,3,4)
+                        }
+                    },
+                    new NodeT(){ID = 1, balance = 0.0f, //B
+                        Edges = new List<EdgeT>(){
+                            new EdgeT(3,0,2,1),
+                            new EdgeT(2,0,3,-1.0f)
+                        }
+                    },
+                    new NodeT(){ID = 2, balance = -2.0f, //C
+                        Edges = new List<EdgeT>(){
+                            new EdgeT(3, 0,4,3)
+                        }
+                    },
+                    new NodeT(){ID = 3, balance = -4.0f //D
+
                     }
                 }
-
-                g.nodes.Push(node.ID, node);
-            }
-            return g;
+            };
+            return CreateFromGraphT(graphT);
+            
         }
 
         public DirectedGraph ResudialGraph(DirectedGraph g)
@@ -329,7 +370,46 @@ namespace MA.Testing
         }
 
         [Fact]
-        public void SuccessiveShortestPath(){
+        public void CreateResudialGraphSSP()
+        {
+            var g = CreateGraphTwo();
+            var g_ssp = MinimalCostAlgorithms.InitSSP(g);
+            var residual = MinimalCostAlgorithms.CreateResidualGraphSSP(g_ssp);
+
+            List<ResudialEdgeT> redges = new List<ResudialEdgeT>(){
+                new ResudialEdgeT(0,1,4,2,true), //A-B
+                new ResudialEdgeT(0,2,3,4,true), //A-C
+                new ResudialEdgeT(2,1, 3,1,false), //C-B
+                new ResudialEdgeT(2,3,4,3, true), //C-D,
+                new ResudialEdgeT(1,3,2,1, true) //B-D
+            };
+
+            List<NodeT> nodes = new List<NodeT>(){
+                new NodeT(){ID= 0, balance = 6, r_balance = 0, b_diff=6.0f},
+                new NodeT(){ID= 1, balance=0, r_balance= 3, b_diff= -3.0f},
+                new NodeT(){ID= 2, balance=-2.0f, r_balance=-3.0f, b_diff=1.0f},
+                new NodeT(){ID= 3, balance=-4.0f, r_balance=0.0f, b_diff=-4.0f}
+            };
+
+            foreach (ResudialEdgeT re in redges)
+            {
+                Edge edge = GraphUtils.GetEdgeFromTo(residual, re.V_FROM, re.V_TO);
+                Assert.StrictEqual<float>(re.cost, edge.GetCosts());
+                Assert.StrictEqual<float>(re.capacity, edge.GetCapacity());
+                Assert.StrictEqual<bool>(re.forward, edge.isResidualForward());
+
+            }
+
+            foreach(NodeT node in nodes){
+                Node r_node = residual.nodes[node.ID];
+                Assert.StrictEqual<float>(node.balance, r_node.GetBalance());
+                Assert.StrictEqual<float>(node.r_balance, r_node.GetR_Balance());
+                Assert.StrictEqual<float>(node.b_diff, r_node.GetBalance() - r_node.GetR_Balance());
+            }
+        }
+
+        public void SuccessiveShortestPath()
+        {
             DirectedGraph g = new DirectedGraph();
             string ROOT = System.IO.Path.Join(Config.SLN_DIR, "data", "costminimal");
             MinCostTestObject[] cases = {
@@ -378,24 +458,29 @@ namespace MA.Testing
 
                 System.Console.ForegroundColor = System.ConsoleColor.Green;
                 g.ReadFromBalancedGraph(mccase.filename, false);
-                File.WriteAllText(Path.Join(Config.TESTS_DIR,"ssp.log"), $"{mccase.name}\n{mccase.filename}\n\n");
+                File.WriteAllText(Path.Join(Config.TESTS_DIR, "ssp.log"), $"{mccase.name}\n{mccase.filename}\n\n");
 
                 if (mccase.expectedException)
                 {
                     Assert.Throws<BalancedFlowMissingException>(() => { Algorithms.SuccessiveShortestPath(g); });
-                    
+
                 }
                 else
-                {   
-                    try{
+                {
+                    try
+                    {
                         float result = Algorithms.SuccessiveShortestPath(g);
                         Assert.StrictEqual<float>(mccase.expectedValue, result);
-                    }catch(BalancedFlowMissingException ex){
-                        Assert.False(true, $"Exception should not be thrown here!!!\n{ex.Message}");
-                    }catch(GraphException ex){
+                    }
+                    catch (BalancedFlowMissingException ex)
+                    {
                         Assert.False(true, $"Exception should not be thrown here!!!\n{ex.Message}");
                     }
-                    
+                    catch (GraphException ex)
+                    {
+                        Assert.False(true, $"Exception should not be thrown here!!!\n{ex.Message}");
+                    }
+
                 }
 
 

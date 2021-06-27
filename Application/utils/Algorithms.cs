@@ -65,7 +65,39 @@ namespace MA
             return components;
         }
 
-        public static List<List<int>> GraphComponents(Graph g){
+        public static bool IsReachable(Graph g, int NODE_S, int NODE_T)
+        {
+            g.UnmarkAllNodes();
+            Queue<Node> queue = new Queue<Node>();
+            Node node = g.nodes[NODE_S];
+            if (!node.isMarked())
+            {
+                node.mark();
+                if(node.ID == NODE_T)
+                    return true;
+
+                queue.Enqueue(node);
+                // BreadthSearch itself
+                while (queue.Count > 0)
+                {
+                    Node firstNode = queue.Dequeue();
+                    List<Node> neighbours = GraphUtils.GetUnmarkedNeighbours(g, firstNode.ID);
+
+                    foreach (Node neighbour in neighbours)
+                    {
+                        neighbour.mark();
+                        if(neighbour.ID == NODE_T)
+                            return true;
+                        queue.Enqueue(neighbour);
+                    }
+                }
+            }
+            g.UnmarkAllNodes();
+            return false;
+        }
+
+        public static List<List<int>> GraphComponents(Graph g)
+        {
             g.UnmarkAllNodes();
             List<List<int>> components = new List<List<int>>();
             Queue<Node> queue = new Queue<Node>();
@@ -116,7 +148,6 @@ namespace MA
             }
             return components;
         }
-
         public static void DepthTraverse(Graph g, Node node)
         {
             if (node == null) { return; }
@@ -691,44 +722,52 @@ namespace MA
                 DirectedGraph g_bflow = MinimalCostAlgorithms.RandomB_Flow(g, sources, sinks);
                 DirectedGraph g_residual = MinimalCostAlgorithms.CreateResidualGraphCC(g_bflow);
                 GraphUtils.NegativeCycleResult cycle = MinimalCostAlgorithms.FindNegativeCycle(g_residual);
-                while(cycle.found){
+                while (cycle.found)
+                {
                     g_bflow = MinimalCostAlgorithms.UpdateFlowsCC(g_bflow, cycle);
                     g_residual = MinimalCostAlgorithms.CreateResidualGraphCC(g_bflow);
                     cycle = MinimalCostAlgorithms.FindNegativeCycle(g_residual);
                 }
                 return costs = MinimalCostAlgorithms.CalculateFlowCosts(g_bflow);
-                
 
-            }catch(GraphException ex)
+
+            }
+            catch (GraphException ex)
             {
                 System.Console.WriteLine(ex.Message);
             }
             return costs;
         }
 
-        public static float SuccessiveShortestPath(DirectedGraph g){
+        public static float SuccessiveShortestPath(DirectedGraph g)
+        {
             List<int> sources = GraphUtils.GetNodeIdsOfType(g, Node.NodeType.SOURCE);
             List<int> sinks = GraphUtils.GetNodeIdsOfType(g, Node.NodeType.SINK);
             float costs = 0.0f;
-            
-            try{
+
+            try
+            {
                 var ssp_graph = MinimalCostAlgorithms.InitSSP(g);
                 var ssp_residual = MinimalCostAlgorithms.CreateResidualGraphSSP(ssp_graph);
-                var pair = MinimalCostAlgorithms.FindSSPPair(ssp_graph,ssp_residual);
+                var pair = MinimalCostAlgorithms.FindSSPPair(ssp_graph, ssp_residual);
 
-                while(pair.found){
+                while (pair.found)
+                {
                     var sp_result = MinimalCostAlgorithms.FindShortestPath(ssp_residual, pair.source, pair.target);
-                    if(!sp_result.pathExists){
+                    if (!sp_result.pathExists)
+                    {
                         throw new GraphException("No path between sources and sinks exists");
                     }
-                    
-                    ssp_graph = MinimalCostAlgorithms.UpdateFlowsSSP(ssp_graph,sp_result);
+
+                    ssp_graph = MinimalCostAlgorithms.UpdateFlowsSSP(ssp_graph, sp_result);
                     ssp_residual = MinimalCostAlgorithms.CreateResidualGraphSSP(ssp_graph);
                     pair = MinimalCostAlgorithms.FindSSPPair(ssp_graph, ssp_residual);
                 }
 
-                foreach(Node node in ssp_graph.nodes.Values){
-                    if(node.GetBalance() != ssp_residual.nodes[node.ID].GetR_Balance()){
+                foreach (Node node in ssp_graph.nodes.Values)
+                {
+                    if (node.GetBalance() != ssp_residual.nodes[node.ID].GetR_Balance())
+                    {
                         throw new BalancedFlowMissingException("Balance of graph does not equal resudial balance");
                     }
                 }
@@ -736,12 +775,14 @@ namespace MA
                 return costs = MinimalCostAlgorithms.CalculateFlowCosts(ssp_graph);
 
 
-            }catch(GraphException ex){
+            }
+            catch (GraphException ex)
+            {
                 System.Console.WriteLine(ex.Message);
             }
             return costs;
         }
 
-        
+
     }
 }

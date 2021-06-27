@@ -277,19 +277,20 @@ namespace MA
             minResult.pathExists = false;
 
             GraphUtils.BFSPResult result = Algorithms.BFSP(g, source, sink, (Edge e) => { return e.GetCosts(); });
-            if (result.G_neu.nodes[sink].Predecessor != null)
+            if (result.G_neu.nodes[sink].DISTANCE != 0)
             {
                 minResult.pathExists = true;
-                Edge predecessor = result.G_neu.nodes[sink].Predecessor;
-                minResult.path.Insert(0, predecessor);
-                while (predecessor.V_FROM != source)
+                Node pre = result.G_neu.nodes[sink];
+                minResult.path.Insert(0, pre.Predecessor);
+                while (pre.ID != source)
                 {
-                    predecessor = result.G_neu.nodes[predecessor.V_FROM].Predecessor;
-                    minResult.path.Insert(0, predecessor);
+                    pre = result.G_neu.nodes[pre.Predecessor.V_FROM];
+                    if(pre.Predecessor != null)
+                        minResult.path.Insert(0, pre.Predecessor);
                 }
 
                 float bS = g.nodes[source].GetBalance() - g.nodes[source].GetR_Balance();
-                float bT = Math.Abs(g.nodes[sink].GetBalance() - g.nodes[sink].GetR_Balance());
+                float bT = g.nodes[sink].GetR_Balance() - g.nodes[sink].GetBalance(); 
                 minResult.y_min = bS < bT ? bS : bT;
 
                 foreach (Edge edge in minResult.path)
@@ -366,7 +367,37 @@ namespace MA
         public static SSPPair FindSSPPair(DirectedGraph g, DirectedGraph residualgraph)
         {
             SSPPair pair = new SSPPair();
-            //TODO: Find Pair 
+            //TODO: Find Pair
+            List<int> sources = new List<int>();
+            List<int> targets = new List<int>();
+            foreach (Node node in residualgraph.nodes.Values)
+            {
+
+                if ((node.GetBalance() - node.GetR_Balance()) > 0)
+                {
+                    sources.Add(node.ID);
+                }
+
+                else if ((node.GetBalance() - node.GetR_Balance()) < 0)
+                {
+                    targets.Add(node.ID);
+                }
+            }
+
+            foreach (int source in sources)
+            {
+                foreach (int target in targets)
+                {
+                    if(Algorithms.IsReachable(residualgraph, source, target)){
+                        pair.source = source;
+                        pair.target = target;
+                        pair.found = true;
+                        return pair;
+                    }
+                    
+                }
+            }
+
             return pair;
         }
         #endregion
