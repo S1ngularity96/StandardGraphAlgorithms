@@ -369,12 +369,11 @@ namespace MA.Testing
             }
         }
 
-        [Fact]
         public void CreateResudialGraphSSP()
         {
             var g = CreateGraphTwo();
             var g_ssp = MinimalCostAlgorithms.InitSSP(g);
-            var residual = MinimalCostAlgorithms.CreateResidualGraphSSP(g_ssp);
+            var residual = MinimalCostAlgorithms.CreateResidualGraphSSP(g_ssp, init: true);
 
             List<ResudialEdgeT> redges = new List<ResudialEdgeT>(){
                 new ResudialEdgeT(0,1,4,2,true), //A-B
@@ -408,9 +407,10 @@ namespace MA.Testing
             }
         }
 
+        [Fact]
         public void SuccessiveShortestPath()
         {
-            DirectedGraph g = new DirectedGraph();
+            
             string ROOT = System.IO.Path.Join(Config.SLN_DIR, "data", "costminimal");
             MinCostTestObject[] cases = {
                 new MinCostTestObject(){
@@ -455,8 +455,8 @@ namespace MA.Testing
 
             foreach (MinCostTestObject mccase in cases)
             {
-
                 System.Console.ForegroundColor = System.ConsoleColor.Green;
+                DirectedGraph g = new DirectedGraph();
                 g.ReadFromBalancedGraph(mccase.filename, false);
                 File.WriteAllText(Path.Join(Config.TESTS_DIR, "ssp.log"), $"{mccase.name}\n{mccase.filename}\n\n");
 
