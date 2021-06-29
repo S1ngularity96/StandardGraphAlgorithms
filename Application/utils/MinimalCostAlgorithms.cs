@@ -277,7 +277,7 @@ namespace MA
             minResult.pathExists = false;
 
             GraphUtils.BFSPResult result = Algorithms.BFSP(g, source, sink, (Edge e) => { return e.GetCosts(); });
-            if (result.G_neu.nodes[sink].DISTANCE != 0)
+            if (result.G_neu.nodes[sink].Predecessor != null)
             {
                 minResult.pathExists = true;
                 Node pre = result.G_neu.nodes[sink];
@@ -285,12 +285,12 @@ namespace MA
                 while (pre.ID != source)
                 {
                     pre = result.G_neu.nodes[pre.Predecessor.V_FROM];
-                    if(pre.Predecessor != null)
+                    if (pre.Predecessor != null)
                         minResult.path.Insert(0, pre.Predecessor);
                 }
 
                 float bS = g.nodes[source].GetBalance() - g.nodes[source].GetR_Balance();
-                float bT = g.nodes[sink].GetR_Balance() - g.nodes[sink].GetBalance(); 
+                float bT = Math.Abs(g.nodes[sink].GetBalance() - g.nodes[sink].GetR_Balance());
                 minResult.y_min = bS < bT ? bS : bT;
 
                 foreach (Edge edge in minResult.path)
@@ -344,20 +344,44 @@ namespace MA
             return g;
         }
 
-        public static DirectedGraph CreateResidualGraphSSP(DirectedGraph g)
+        public static DirectedGraph CreateResidualGraphSSP(DirectedGraph g, bool init)
         {
             DirectedGraph residual = CreateResidualGraphCC(g);
-            foreach (Node node in g.nodes.Values)
+            if (init)
             {
-                residual.nodes[node.ID].SetBalance(node.GetBalance());
-                foreach (Edge edge in node.edges)
+                foreach (Node node in g.nodes.Values)
                 {
-                    if (edge.GetCosts() < 0)
+                    residual.nodes[node.ID].SetBalance(node.GetBalance());
+                    foreach (Edge edge in node.edges)
                     {
-                        Node r_vfrom = residual.nodes[edge.V_FROM];
-                        Node r_vto = residual.nodes[edge.V_TO];
-                        r_vfrom.SetR_Balance(r_vfrom.GetR_Balance() + edge.GetCapacity());
-                        r_vto.SetR_Balance(r_vto.GetR_Balance() - edge.GetCapacity());
+                        if (init)
+                        {
+                            if (edge.GetCosts() < 0)
+                            {
+                                Node r_vfrom = residual.nodes[edge.V_FROM];
+                                Node r_vto = residual.nodes[edge.V_TO];
+                                r_vfrom.SetR_Balance(r_vfrom.GetR_Balance() - edge.GetCapacity());
+                                r_vto.SetR_Balance(r_vto.GetR_Balance() + edge.GetCapacity());
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                foreach (Node node in residual.nodes.Values)
+                {
+                    node.SetBalance(g.nodes[node.ID].GetBalance());
+                    foreach (Edge edge in node.edges)
+                    {
+                        if (edge.isResidualBackward())
+                        {
+                            Node R_VFROM = residual.nodes[edge.V_FROM];
+                            Node R_VTO = residual.nodes[edge.V_TO];
+                            R_VFROM.SetR_Balance(R_VFROM.GetR_Balance() - edge.GetCapacity());
+                            R_VTO.SetR_Balance(R_VTO.GetR_Balance() + edge.GetCapacity());
+                        }
+
                     }
                 }
             }
@@ -388,13 +412,14 @@ namespace MA
             {
                 foreach (int target in targets)
                 {
-                    if(Algorithms.IsReachable(residualgraph, source, target)){
+                    if (Algorithms.IsReachable(residualgraph, source, target))
+                    {
                         pair.source = source;
                         pair.target = target;
                         pair.found = true;
                         return pair;
                     }
-                    
+
                 }
             }
 

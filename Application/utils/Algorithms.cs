@@ -748,7 +748,7 @@ namespace MA
             try
             {
                 var ssp_graph = MinimalCostAlgorithms.InitSSP(g);
-                var ssp_residual = MinimalCostAlgorithms.CreateResidualGraphSSP(ssp_graph);
+                var ssp_residual = MinimalCostAlgorithms.CreateResidualGraphSSP(ssp_graph, init: true);
                 var pair = MinimalCostAlgorithms.FindSSPPair(ssp_graph, ssp_residual);
 
                 while (pair.found)
@@ -760,7 +760,7 @@ namespace MA
                     }
 
                     ssp_graph = MinimalCostAlgorithms.UpdateFlowsSSP(ssp_graph, sp_result);
-                    ssp_residual = MinimalCostAlgorithms.CreateResidualGraphSSP(ssp_graph);
+                    ssp_residual = MinimalCostAlgorithms.CreateResidualGraphSSP(ssp_graph, init: false);
                     pair = MinimalCostAlgorithms.FindSSPPair(ssp_graph, ssp_residual);
                 }
 
