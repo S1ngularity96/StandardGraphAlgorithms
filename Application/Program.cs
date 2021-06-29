@@ -256,8 +256,8 @@ namespace MA
                 new Structs.MinCostDemoObject(){
                     name = "Kostenminimal1",
                     filename = System.IO.Path.Join(ROOT, "Kostenminimal1.txt")
-                }
-                /*new Structs.MinCostDemoObject(){
+                },
+                new Structs.MinCostDemoObject(){
                     name = "Kostenminimal2",
                     filename = System.IO.Path.Join(ROOT, "Kostenminimal2.txt")
                 },
@@ -280,8 +280,7 @@ namespace MA
                 new Structs.MinCostDemoObject(){
                     name = "Kostenminimal_gross3",
                     filename = System.IO.Path.Join(ROOT, "Kostenminimal_gross3.txt")
-                } */
-
+                }
             };
 
             foreach (Helper.Structs.MinCostDemoObject mccase in cases)
