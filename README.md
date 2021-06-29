@@ -31,4 +31,4 @@
 
 ### Minimum-Cost-Flow
 - [x] cycle canceling
-- [ ] successive shortest path
+- [x] successive shortest path
