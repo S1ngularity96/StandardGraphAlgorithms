@@ -20,7 +20,10 @@ namespace MA.Helper
         [Option("flowdemo", Required = false, Default = false, HelpText = "Runs max flow demo with edmond-karp Algorithm")]
         public bool maxflowdemo { get; set; }
 
-        [Option("mincost", Required = false, Default = false, HelpText = "Runs min-cost calculation demo")]
-        public bool mincostdemo { get; set; }
+        [Option("mincostcc", Required = false, Default = false, HelpText = "Runs cycle-canceling calculation demo")]
+        public bool mincostdemocc { get; set; }
+
+        [Option("mincostssp", Required = false, Default = false, HelpText = "Runs successive-shortes-path calculation demo")]
+        public bool mincostdemossp { get; set; }
     }
 }
