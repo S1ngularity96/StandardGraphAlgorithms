@@ -21,6 +21,7 @@ namespace MA
         }
         static void RunOptions(CLIOptions options)
         {
+            ENABLE_TIME_MEASUREMENTS = options.stopwatch;
             if (options.spdemo)
             {
                 ShortestPathDemo();
@@ -36,7 +37,8 @@ namespace MA
                 MinCostDemoCC();
             }
 
-            if(options.mincostdemossp){
+            if (options.mincostdemossp)
+            {
                 MinCostDemoSSP();
             }
 
@@ -249,7 +251,8 @@ namespace MA
             System.Console.ForegroundColor = System.ConsoleColor.Gray;
         }
 
-        static void MinCostDemoSSP(){
+        static void MinCostDemoSSP()
+        {
             DirectedGraph g = new DirectedGraph();
             string ROOT = System.IO.Path.Join(Config.SLN_DIR, "data", "costminimal");
             Helper.Structs.MinCostDemoObject[] cases = {
@@ -289,7 +292,11 @@ namespace MA
                 {
                     System.Console.ForegroundColor = System.ConsoleColor.Green;
                     g.ReadFromBalancedGraph(mccase.filename, false);
-                    float result = Algorithms.SuccessiveShortestPath(g);
+                    float result = 0;
+                    Diagnostic.MeasureTime(() =>
+                    {
+                        result = Algorithms.SuccessiveShortestPath(g);
+                    });
                     System.Console.WriteLine($"{mccase.name}: {result}");
                 }
                 catch (BalancedFlowMissingException)
