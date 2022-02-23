@@ -1,36 +1,38 @@
-# Mathematische Algorithmen
+# Standard Graph Algorithms
+--- 
+This repository contains basic algorithms for graph datastructures
 
 ![screen](./docs/carbon.png)
 
 ## Datenstrukturen
 
-- [x] Ungewichteter Graph
-- [x] Gewichteter Graph
+- [x] unweighted graph
+- [x] weighted graph
   
-## Algorithmen
+## Algorithms
   
-### Traversierung
-- [x] Tiefensuche  + Zusammenhangskomponenten identifizieren
-- [x] Breitensuche + Zusammenhangskomponenten identifizieren
+### Traverse
+- [x] depth first serach, identify components
+- [x] breadth first search, identify components
   
 ### MST
-- [x] Prim
-- [x] Kruskal 
+- [x] prim
+- [x] kruskal 
   
   
 ### TSP
-- [x] Nächster Nachbar
-- [x] Doppelter-Baum
-- [x] Alle Touren durchsuchen
+- [x] next neighbour
+- [x] doppelter baum
+- [x] find all paths
 - [x] Branch&Bound
 
 ### SP
-- [x] Dijkstra
-- [x] Moore-Bellman-Ford
+- [x] dijkstra
+- [x] moore-Bellman-Ford
   
 ### Max-Flows
-- [x] Edmond-Karp
+- [x] edmond-Karp
 
 ### Minimum-Cost-Flow
-- [x] Cycle-Canceling-Alg.
-- [x] Successive-Shortest-Path-Alg
+- [x] cycle-canceling
+- [x] successive-shortest-path
