@@ -1,15 +1,13 @@
 using Xunit;
 using MA.Classes;
-using MA.Collections;
+using MA.Exceptions;
 using System.Collections.Generic;
 using System.IO;
-using System;
 namespace MA.Testing
 {
     public class MinimalCostTests
     {
-        string TESTS_DIR = "C:/Users/Livem/Documents/Programmierprojekte/CSharp/GraphAlgorithms/Tests";
-        string SLN_DIR = "C:/Users/Livem/Documents/Programmierprojekte/CSharp/GraphAlgorithms";
+
 
         struct EdgeT
         {
@@ -29,6 +27,8 @@ namespace MA.Testing
         {
             public int ID;
             public float balance;
+            public float r_balance;
+            public float b_diff;
             public Node.NodeType type;
             public List<EdgeT> Edges;
         }
@@ -49,6 +49,14 @@ namespace MA.Testing
                 this.cost = cost;
                 this.capacity = capacity;
             }
+        }
+
+        struct MinCostTestObject
+        {
+            public string name;
+            public string filename;
+            public float expectedValue;
+            public bool expectedException;
         }
 
         struct GraphT
@@ -105,6 +113,26 @@ namespace MA.Testing
             return g;
         }
 
+        private DirectedGraph CreateFromGraphT(GraphT graphT)
+        {
+            DirectedGraph g = new DirectedGraph();
+            foreach (NodeT nodeT in graphT.nodes)
+            {
+                var node = new Node(nodeT.ID);
+                node.SetBalance(nodeT.balance);
+                if (nodeT.Edges != null)
+                {
+                    foreach (EdgeT edge in nodeT.Edges)
+                    {
+                        node.AddEdge(new Edge(nodeT.ID, edge.V_TO, edge.flow, edge.cap, edge.cost));
+                    }
+                }
+
+                g.nodes.Push(node.ID, node);
+            }
+            return g;
+        }
+
         public DirectedGraph CreateGraphOne()
         {
             GraphT graphT = new GraphT()
@@ -136,27 +164,46 @@ namespace MA.Testing
             };
 
 
-            DirectedGraph g = new DirectedGraph();
-            foreach (NodeT nodeT in graphT.nodes)
+            return CreateFromGraphT(graphT);
+        }
+
+
+        public DirectedGraph CreateGraphTwo()
+        {
+
+            DirectedGraph graph = new DirectedGraph();
+            GraphT graphT = new GraphT()
             {
-                var node = new Node(nodeT.ID);
-                node.SetBalance(nodeT.balance);
-                if (nodeT.Edges != null)
-                {
-                    foreach (EdgeT edge in nodeT.Edges)
-                    {
-                        node.AddEdge(new Edge(nodeT.ID, edge.V_TO, edge.flow, edge.cap, edge.cost));
+                nodes = new List<NodeT>(){
+                    new NodeT(){ID = 0, balance = 6.0f, // A
+                        Edges = new List<EdgeT>(){
+                            new EdgeT(1, 0,4,2),
+                            new EdgeT(2, 0,3,4)
+                        }
+                    },
+                    new NodeT(){ID = 1, balance = 0.0f, //B
+                        Edges = new List<EdgeT>(){
+                            new EdgeT(3,0,2,1),
+                            new EdgeT(2,0,3,-1.0f)
+                        }
+                    },
+                    new NodeT(){ID = 2, balance = -2.0f, //C
+                        Edges = new List<EdgeT>(){
+                            new EdgeT(3, 0,4,3)
+                        }
+                    },
+                    new NodeT(){ID = 3, balance = -4.0f //D
+
                     }
                 }
-
-                g.nodes.Push(node.ID, node);
-            }
-            return g;
+            };
+            return CreateFromGraphT(graphT);
+            
         }
 
         public DirectedGraph ResudialGraph(DirectedGraph g)
         {
-            return MinimalCostAlgorithms.CreateResidualGraph(g);
+            return MinimalCostAlgorithms.CreateResidualGraphCC(g);
         }
 
         [Fact]
@@ -247,8 +294,8 @@ namespace MA.Testing
             var result = MinimalCostAlgorithms.FindNegativeCycle(resudial);
             Assert.True(result.found);
 
-            File.WriteAllText(Path.Join(TESTS_DIR, "negative_path.log"), MinimalCostAlgorithms.PrintNegativeCycleEdges(result.path));
-            File.AppendAllText(Path.Join(TESTS_DIR, "negative_path.log"), $"y=min ={result.y_min}");
+            File.WriteAllText(Path.Join(Config.TESTS_DIR, "negative_path.log"), MinimalCostAlgorithms.PrintNegativeCycleEdges(result.path));
+            File.AppendAllText(Path.Join(Config.TESTS_DIR, "negative_path.log"), $"y=min ={result.y_min}");
 
         }
 
@@ -256,41 +303,189 @@ namespace MA.Testing
         public void CycleCanceling()
         {
 
-            File.WriteAllText(Path.Join(TESTS_DIR, "cc.log"), "CycleCanceling:\n");
             DirectedGraph g = new DirectedGraph();
-            g.ReadFromBalancedGraph(Path.Join(SLN_DIR, "data", "costminimal", "Kostenminimal1.txt"), false);
-            List<int> sources = GraphUtils.GetNodeIdsOfType(g, Node.NodeType.SOURCE);
-            List<int> sinks = GraphUtils.GetNodeIdsOfType(g, Node.NodeType.SINK);
-            float costs = 0.0f;
-            try
-            {
-                int tries = 1000;
-                int currentTry = 1;
-                DirectedGraph g_bflow = MinimalCostAlgorithms.RandomB_Flow(g, sources, sinks);
-                File.AppendAllText(Path.Join(TESTS_DIR, "cc.log"), "b_flow:\n"+g_bflow.GraphToString());
-                DirectedGraph g_residual = MinimalCostAlgorithms.CreateResidualGraph(g_bflow);
-                File.AppendAllText(Path.Join(TESTS_DIR, "cc.log"), "\n\nresidual:\n" + g_residual.GraphToString());
-                GraphUtils.NegativeCycleResult cycle = MinimalCostAlgorithms.FindNegativeCycle(g_residual);
-                File.AppendAllText(Path.Join(TESTS_DIR, "cc.log"), "\n\nnegative cycle:\n" + MinimalCostAlgorithms.PrintNegativeCycleEdges(cycle.path));
-                while (cycle.found && (currentTry != tries))
-                {
-                    g_bflow = MinimalCostAlgorithms.UpdateFlows(g_bflow, cycle);
-                    File.AppendAllText(Path.Join(TESTS_DIR, "cc.log"), "b_flow:\n" + g_bflow.GraphToString());
-                    g_residual = MinimalCostAlgorithms.CreateResidualGraph(g_bflow);
-                    File.AppendAllText(Path.Join(TESTS_DIR, "cc.log"), "\n\nresidual:\n" + g_residual.GraphToString());
-                    cycle = MinimalCostAlgorithms.FindNegativeCycle(g_residual);
-                    File.AppendAllText(Path.Join(TESTS_DIR, "cc.log"), "\n\nnegative cycle:\n" + MinimalCostAlgorithms.PrintNegativeCycleEdges(cycle.path));
-                    currentTry++;
+            string ROOT = System.IO.Path.Join(Config.SLN_DIR, "data", "costminimal");
+            MinCostTestObject[] cases = {
+                new MinCostTestObject(){
+                    name = "Kostenminimal1",
+                    filename = System.IO.Path.Join(ROOT, "Kostenminimal1.txt"),
+                    expectedException = false,
+                    expectedValue = 3
+                },
+                new MinCostTestObject(){
+                    name = "Kostenminimal2",
+                    filename = System.IO.Path.Join(ROOT, "Kostenminimal2.txt"),
+                    expectedException = false,
+                    expectedValue = 0
+                },
+                new MinCostTestObject(){
+                    name = "Kostenminimal3",
+                    filename = System.IO.Path.Join(ROOT, "Kostenminimal3.txt"),
+                    expectedException = true
+                },
+                new MinCostTestObject(){
+                    name = "Kostenminimal4",
+                    filename = System.IO.Path.Join(ROOT, "Kostenminimal4.txt"),
+                    expectedException = true
+                },
+                new MinCostTestObject(){
+                    name = "Kostenminimal_gross1",
+                    filename = System.IO.Path.Join(ROOT, "Kostenminimal_gross1.txt"),
+                    expectedValue = 1537
+                },
+                new MinCostTestObject(){
+                    name = "Kostenminimal_gross2",
+                    filename = System.IO.Path.Join(ROOT, "Kostenminimal_gross2.txt"),
+                    expectedValue = 1838
+                },
+                new MinCostTestObject(){
+                    name = "Kostenminimal_gross3",
+                    filename = System.IO.Path.Join(ROOT, "Kostenminimal_gross3.txt"),
+                    expectedException = true
                 }
-                costs = MinimalCostAlgorithms.CalculateFlowCosts(g_bflow);
-            }
-            catch (Exception ex)
+
+            };
+
+            foreach (MinCostTestObject mccase in cases)
             {
 
+                System.Console.ForegroundColor = System.ConsoleColor.Green;
+                g.ReadFromBalancedGraph(mccase.filename, false);
+
+                if (mccase.expectedException)
+                {
+                    Assert.Throws<BalancedFlowMissingException>(() =>
+                    {
+                        Algorithms.CycleCanceling(g);
+                    });
+                }
+                else
+                {
+                    float result = Algorithms.CycleCanceling(g);
+                    Assert.StrictEqual<float>(mccase.expectedValue, result);
+                }
+
+
+            }
+        }
+
+        public void CreateResudialGraphSSP()
+        {
+            var g = CreateGraphTwo();
+            var g_ssp = MinimalCostAlgorithms.InitSSP(g);
+            var residual = MinimalCostAlgorithms.CreateResidualGraphSSP(g_ssp, init: true);
+
+            List<ResudialEdgeT> redges = new List<ResudialEdgeT>(){
+                new ResudialEdgeT(0,1,4,2,true), //A-B
+                new ResudialEdgeT(0,2,3,4,true), //A-C
+                new ResudialEdgeT(2,1, 3,1,false), //C-B
+                new ResudialEdgeT(2,3,4,3, true), //C-D,
+                new ResudialEdgeT(1,3,2,1, true) //B-D
+            };
+
+            List<NodeT> nodes = new List<NodeT>(){
+                new NodeT(){ID= 0, balance = 6, r_balance = 0, b_diff=6.0f},
+                new NodeT(){ID= 1, balance=0, r_balance= 3, b_diff= -3.0f},
+                new NodeT(){ID= 2, balance=-2.0f, r_balance=-3.0f, b_diff=1.0f},
+                new NodeT(){ID= 3, balance=-4.0f, r_balance=0.0f, b_diff=-4.0f}
+            };
+
+            foreach (ResudialEdgeT re in redges)
+            {
+                Edge edge = GraphUtils.GetEdgeFromTo(residual, re.V_FROM, re.V_TO);
+                Assert.StrictEqual<float>(re.cost, edge.GetCosts());
+                Assert.StrictEqual<float>(re.capacity, edge.GetCapacity());
+                Assert.StrictEqual<bool>(re.forward, edge.isResidualForward());
+
             }
 
-            Assert.StrictEqual<float>(3.0f, costs);
-
+            foreach(NodeT node in nodes){
+                Node r_node = residual.nodes[node.ID];
+                Assert.StrictEqual<float>(node.balance, r_node.GetBalance());
+                Assert.StrictEqual<float>(node.r_balance, r_node.GetR_Balance());
+                Assert.StrictEqual<float>(node.b_diff, r_node.GetBalance() - r_node.GetR_Balance());
+            }
         }
+
+        [Fact]
+        public void SuccessiveShortestPath()
+        {
+            
+            string ROOT = System.IO.Path.Join(Config.SLN_DIR, "data", "costminimal");
+            MinCostTestObject[] cases = {
+                new MinCostTestObject(){
+                    name = "Kostenminimal1",
+                    filename = System.IO.Path.Join(ROOT, "Kostenminimal1.txt"),
+                    expectedException = false,
+                    expectedValue = 3
+                },
+                new MinCostTestObject(){
+                    name = "Kostenminimal2",
+                    filename = System.IO.Path.Join(ROOT, "Kostenminimal2.txt"),
+                    expectedException = false,
+                    expectedValue = 0
+                },
+                new MinCostTestObject(){
+                    name = "Kostenminimal3",
+                    filename = System.IO.Path.Join(ROOT, "Kostenminimal3.txt"),
+                    expectedException = true
+                },
+                new MinCostTestObject(){
+                    name = "Kostenminimal4",
+                    filename = System.IO.Path.Join(ROOT, "Kostenminimal4.txt"),
+                    expectedException = true
+                },
+                new MinCostTestObject(){
+                    name = "Kostenminimal_gross1",
+                    filename = System.IO.Path.Join(ROOT, "Kostenminimal_gross1.txt"),
+                    expectedValue = 1537
+                },
+                new MinCostTestObject(){
+                    name = "Kostenminimal_gross2",
+                    filename = System.IO.Path.Join(ROOT, "Kostenminimal_gross2.txt"),
+                    expectedValue = 1838
+                },
+                new MinCostTestObject(){
+                    name = "Kostenminimal_gross3",
+                    filename = System.IO.Path.Join(ROOT, "Kostenminimal_gross3.txt"),
+                    expectedException = true
+                }
+
+            };
+
+            foreach (MinCostTestObject mccase in cases)
+            {
+                System.Console.ForegroundColor = System.ConsoleColor.Green;
+                DirectedGraph g = new DirectedGraph();
+                g.ReadFromBalancedGraph(mccase.filename, false);
+                File.WriteAllText(Path.Join(Config.TESTS_DIR, "ssp.log"), $"{mccase.name}\n{mccase.filename}\n\n");
+
+                if (mccase.expectedException)
+                {
+                    Assert.Throws<BalancedFlowMissingException>(() => { Algorithms.SuccessiveShortestPath(g); });
+
+                }
+                else
+                {
+                    try
+                    {
+                        float result = Algorithms.SuccessiveShortestPath(g);
+                        Assert.StrictEqual<float>(mccase.expectedValue, result);
+                    }
+                    catch (BalancedFlowMissingException ex)
+                    {
+                        Assert.False(true, $"Exception should not be thrown here!!!\n{ex.Message}");
+                    }
+                    catch (GraphException ex)
+                    {
+                        Assert.False(true, $"Exception should not be thrown here!!!\n{ex.Message}");
+                    }
+
+                }
+
+
+            }
+        }
+
     }
 }

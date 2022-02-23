@@ -9,6 +9,7 @@ namespace MA.Classes
         private bool V_MARKED { get; set; }
         public float DISTANCE { get; set; }
         private float BALANCE { get; set;}
+        private float R_BALANCE {get;set;}
         public Edge Predecessor = null;
         public List<Edge> edges = new List<Edge>();
 
@@ -35,6 +36,14 @@ namespace MA.Classes
 
         public float GetBalance(){
             return this.BALANCE;
+        }
+
+        public void SetR_Balance(float r_balance){
+            this.R_BALANCE = r_balance;
+        }
+
+        public float GetR_Balance(){
+            return this.R_BALANCE;
         }
 
         public void AddEdge(int V_FROM, int V_TO)
