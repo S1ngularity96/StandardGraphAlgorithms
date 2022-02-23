@@ -1,5 +1,7 @@
 # Mathematische Algorithmen
 
+![screen](./docs/carbon.png)
+
 ## Datenstrukturen
 
 - [x] Ungewichteter Graph
@@ -31,4 +33,4 @@
 
 ### Minimum-Cost-Flow
 - [x] Cycle-Canceling-Alg.
-- [ ] Successove-Shortest-Path-Alg
+- [x] Successive-Shortest-Path-Alg
