@@ -1,8 +1,12 @@
 using CommandLine;
+using MA.Types;
 namespace MA.Helper
 {
     public class CLIOptions
     {
+        public ALGORITHM selectedAlgorithm = ALGORITHM.NONE;
+
+
         [Option('v', "verbose", Required = false, HelpText = "Set output to verbose messages.")]
         public bool Verbose { get; set; }
 
@@ -15,15 +19,15 @@ namespace MA.Helper
         [Option('s', "stopwatch", Required = false, Default = false, HelpText = "Use stopwatch and measure time")]
         public bool stopwatch { get; set; }
 
-        [Option("spdemo", Required = false, Default = false, HelpText = "Runs shortest path demo")]
-        public bool spdemo { get; set; }
-        [Option("flowdemo", Required = false, Default = false, HelpText = "Runs max flow demo with edmond-karp Algorithm")]
-        public bool maxflowdemo { get; set; }
+        [Option("spdemo", Required = false, HelpText = "Runs shortest path demo")]
+        public bool spdemo { get { return ALGORITHM.SHORTEST_PATH == selectedAlgorithm; } set { selectedAlgorithm = ALGORITHM.SHORTEST_PATH; } }
+        [Option("flowdemo", Required = false, HelpText = "Runs max flow demo with edmond-karp Algorithm")]
+        public bool maxflowdemo { get { return ALGORITHM.FLOW == selectedAlgorithm; } set { selectedAlgorithm = ALGORITHM.FLOW; } }
 
-        [Option("mincostcc", Required = false, Default = false, HelpText = "Runs cycle-canceling calculation demo")]
-        public bool mincostdemocc { get; set; }
+        [Option("mincostcc", Required = false, HelpText = "Runs cycle-canceling calculation demo")]
+        public bool mincostdemocc { get { return ALGORITHM.MC_CYCLE_CANCELING == selectedAlgorithm; } set { selectedAlgorithm = ALGORITHM.MC_CYCLE_CANCELING; } }
 
-        [Option("mincostssp", Required = false, Default = false, HelpText = "Runs successive-shortes-path calculation demo")]
-        public bool mincostdemossp { get; set; }
+        [Option("mincostssp", Required = false, HelpText = "Runs successive-shortes-path calculation demo")]
+        public bool mincostdemossp { get { return ALGORITHM.MC_SUCCESSIVE_SHORTEST_PATH == selectedAlgorithm; } set { selectedAlgorithm = ALGORITHM.MC_SUCCESSIVE_SHORTEST_PATH; } }
     }
 }

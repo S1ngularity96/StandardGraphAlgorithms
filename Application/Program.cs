@@ -22,30 +22,37 @@ namespace MA
         static void RunOptions(CLIOptions options)
         {
             ENABLE_TIME_MEASUREMENTS = options.stopwatch;
-            if (options.spdemo)
-            {
-                ShortestPathDemo();
-            }
 
-            if (options.maxflowdemo)
-            {
-                MaxFlowDemo();
-            }
+            switch(options.selectedAlgorithm){
+                case Types.ALGORITHM.SHORTEST_PATH:
+                    ShortestPathDemo();
+                    break;
+                case Types.ALGORITHM.FLOW:
+                    MaxFlowDemo();
+                    break;
+                case Types.ALGORITHM.MC_CYCLE_CANCELING:
+                    MinCostDemoCC();
+                    break;
+                case Types.ALGORITHM.MC_SUCCESSIVE_SHORTEST_PATH:
+                    MinCostDemoSSP();
+                    break;
+                case Types.ALGORITHM.NONE:
 
-            if (options.mincostdemocc)
-            {
-                MinCostDemoCC();
+                    PrintStats(options);
+                    break;
             }
-
-            if (options.mincostdemossp)
-            {
-                MinCostDemoSSP();
-            }
-
             if (options.File != null)
             {
                 //... Choose something 
             }
+        }
+
+        static void PrintStats(CLIOptions options){
+            Diagnostic.MeasureTime(() => {
+                Graph g = new UndirectedGraph();
+                g.ReadFromFile(options.File,options.capacity, log: true);
+                System.Console.WriteLine("{0} with Edges: {1} and Nodes: {2}", g.GetType(), g.NUMBER_OF_EDGES(), g.NUMBER_OF_NODES(), "2 Minuten");
+            });
         }
 
         static void BruteForce(CLIOptions options, bool BB = false)
